@@ -1,18 +1,25 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
+import { useDispatch, connect } from "react-redux";
+import { setPage } from "../../Redux/Reducers/Slice/SidebarSlice";
 
-export default function BarTab2(props) {
+export function BarTab2(props) {
   const classes = useStyles();
+  const dispatch = useDispatch();
+
+  const setPageTo = ({ page }) => {
+    dispatch(setPage(page));
+  };
 
   return (
     <div
       className={classes.maxContainer}
       onClick={() => {
-        // props.accessPage(props.jumpto);
+        setPageTo({ page: props.barTitle });
       }}
     >
       <div className={classes.tabContainer}>
-        <div id="circleIcon" className={classes.circleIcon}/>
+        <div id="circleIcon" className={classes.circleIcon} />
         <div className={classes.mainTitle}>{props.barTitle}</div>
       </div>
     </div>
@@ -45,7 +52,6 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   mainTitle: {
-    // marginLeft: "20px",
     fontSize: "0.8em",
   },
   maxContainer: {
@@ -54,10 +60,21 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
     alignItems: "center",
     cursor: "pointer",
-    margin:"20px 0",
+    margin: "20px 0",
     "&:hover #circleIcon": {
       border: "2px #1697EE solid",
       background: "white",
     },
   },
 }));
+
+const mapStateToProps = (state) => {
+  return {
+    ...state,
+    PageState: state.SideBar,
+  };
+};
+
+const mapDispatch = { setPage };
+
+export default connect(mapStateToProps, mapDispatch)(BarTab2);

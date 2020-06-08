@@ -44,7 +44,10 @@ const typeDefs = gql`
     getFields: [Fields]
     getAlbums: GeneralResponse
     getReferenceDataOfAlbum(albumId: ID): GeneralResponse
-    getReferencedFieldsOfAlbumType(data_album_type: String): GeneralResponse
+    getReferencedFieldsOfAlbumType(
+      data_album_type: String!
+      master: String
+    ): GeneralResponse
   }
 
   type Mutation {

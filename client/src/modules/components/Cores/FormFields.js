@@ -4,39 +4,46 @@ import {
   getReferencedFieldsOfAlbumType,
   addBatchData,
 } from "../../Server/FieldsQueries";
-
 import { useDispatch, connect } from "react-redux";
 import {
   setFieldAlbumProperty,
   setFieldValue,
 } from "../../Redux/Reducers/Slice/FieldsSlice";
-
 import InputFields from "./InputFields";
+import FormDialog from "../Periperhals/FormDialog";
+import Step from "@material-ui/core/Step";
+import StepLabel from "@material-ui/core/StepLabel";
 
-export function FormFields({ fields_of_type, FieldsState }) {
+export function FormFields({ fields_of_type, FieldsState, master }) {
   const dispatch = useDispatch();
 
-  const { loading, error, data = [] } = useQuery(getReferencedFieldsOfAlbumType, {
-    variables: { type_subject: fields_of_type },
-  });
-  
+  const { loading, error, data = [] } = useQuery(
+    getReferencedFieldsOfAlbumType,
+    {
+      variables: { type_subject: fields_of_type, master },
+    }
+  );
+
   return (
-    <div>
-      <br />
-      <form>
-        {loading && "Loading"}
-        {data.getReferencedFieldsOfAlbumType &&
-          data.getReferencedFieldsOfAlbumType.result.map((recieved_data) =>
-            FormReducers(recieved_data)
-          )}
-        <br />
-      </form>
-    </div>
+    !loading &&
+    // <React.Fragment>
+    // <br />
+    // <form>
+    // {loading && "Loading"}
+    data.getReferencedFieldsOfAlbumType &&
+    data.getReferencedFieldsOfAlbumType.result.map((recieved_data) =>
+      FormReducers(recieved_data)
+    )
+    // <br />
+    // </form>
+    // </React.Fragment>
   );
 }
 
 export function FormReducers(data) {
-  const considerations = JSON.parse(data.considerations) ?? null;
+  const considerations = data.considerations
+    ? JSON.parse(data.considerations)
+    : null;
 
   switch (data.field_type) {
     case "INPUT_FIELD_STRING":
@@ -89,72 +96,17 @@ export function FormReducers(data) {
           />
         </div>
       );
+    case "COMPONENT_FORM_DIALOG":
+      return (
+        <div>
+          <FormDialog title={data.main_subject} />
+        </div>
+      );
+    // return data.main_subject;
     default:
-      break;
+      return null;
   }
 }
-
-// export function InputFields({
-//   field_id,
-//   field_subject,
-//   value,
-//   input_type,
-//   considerations = null,
-//   label_subject,
-//   FieldsState,
-// }) {
-//   const dispatch = useDispatch();
-
-//   const considerations_Process = ({ process }) => {
-//     const { on_submit } = process;
-
-//     if (on_submit.data_album_type) {
-//       dispatch(
-//         setFieldAlbumProperty({ data_album_type: on_submit.data_album_type })
-//       );
-//     }
-//     console.log(on_submit.function);
-
-//     if (on_submit.function) {
-//       switch (on_submit.function) {
-//         case "register":
-//           console.log("fields", FieldsState);
-//           //   // consolidateBatchData({
-//           //   //   variables: {
-//           //   //     input: ConvertToDataFields(state),
-//           //   //     data_album_type: FieldsState.data_album_type.data_album_type,
-//           //   //   },
-//           //   // });
-//           return null;
-//         case "verify":
-//           alert("verify");
-//           return null;
-//         default:
-//           break;
-//       }
-//     }
-//   };
-
-//   return (
-//     <React.Fragment>
-//       {label_subject && <label>{label_subject}</label>}
-//       <br />
-//       <input
-//         onClick={(e) => {
-//           e.preventDefault();
-//           if (considerations && considerations.Process !== null) {
-//             considerations_Process({ process: considerations.Process });
-//           }
-//         }}
-//         data-field_id={field_id}
-//         data-field_subject={field_subject}
-//         type={input_type}
-//         value={value}
-//       />
-//       <br />
-//     </React.Fragment>
-//   );
-// }
 
 const mapStateToProps = (state) => {
   return {
@@ -163,7 +115,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-// const mapDispatchtoProps = { setFieldAlbumProperty };
 const mapDispatch = { setFieldValue };
 
 export default connect(mapStateToProps, mapDispatch)(FormFields);

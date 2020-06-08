@@ -34,8 +34,10 @@ const resolvers = {
       });
     },
     async getReferencedFieldsOfAlbumType(parent, args, context, info) {
+
       return await context.dataSources.Base.getReferencedFieldsOfAlbumType({
         data_album_type: args.data_album_type,
+        master: args.master,
       });
     },
   },
@@ -53,13 +55,11 @@ const resolvers = {
       return await context.dataSources.Base.consolidateBatchData(args);
     },
     async validateDataCorelation(parent, args, context, info) {
-      // console.log('validation process')
       return await context.dataSources.Base.validateDataCorelation(args);
     },
   },
   MutationResult: {
     __resolveType(obj, context, info) {
-      console.log(obj)
       if (obj.field_type) return "Fields";
       if (obj.data_id !== undefined) return "Data";
       if (obj.data_album_type) return "DataAlbum";

@@ -5,9 +5,13 @@ import { makeStyles } from "@material-ui/core/styles";
 import BarTab2 from "./BarTab2";
 
 export default function Sidebar() {
-  const { loading, error, data = [] } = useQuery(getReferencedFieldsOfAlbumType, {
-    variables: { type_subject: "SIDEBAR_LINKS" },
-  });
+  const { loading, error, data = [] } = useQuery(
+    getReferencedFieldsOfAlbumType,
+    {
+      variables: { type_subject: "SIDEBAR_LINKS" },
+    }
+  );
+  
   const classes = useStyles();
 
   return (

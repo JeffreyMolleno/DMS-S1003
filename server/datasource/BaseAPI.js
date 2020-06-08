@@ -158,7 +158,6 @@ class BaseAPI {
 
   async getAlbums() {
     const result = await this.context.db.query(`SELECT * FROM album`);
-
     return {
       code: 202,
       message: `Retrieving all registered data albums definitions`,
@@ -178,12 +177,14 @@ class BaseAPI {
     };
   }
 
-  async getReferencedFieldsOfAlbumType({ data_album_type }) {
-    const result = await this.context.db.query(
-      `SELECt * FROM fields INNER JOIN album ON fields.album_id = album.data_album_id WHERE data_album_type = '${data_album_type}'`
-    );
-
-    console.log(result)
+  async getReferencedFieldsOfAlbumType({ data_album_type, master }) {
+    const result = master
+      ? await this.context.db.query(
+          `SELECt * FROM fields INNER JOIN album ON fields.album_id = album.data_album_id WHERE data_album_type = '${data_album_type}'  AND master_subject = '${master}'`
+        )
+      : await this.context.db.query(
+          `SELECt * FROM fields INNER JOIN album ON fields.album_id = album.data_album_id WHERE data_album_type = '${data_album_type}'`
+        );
 
     return {
       code: 202,
@@ -342,7 +343,10 @@ class BaseAPI {
           verify_as,
         });
 
-        if (!result[0] || initial[0].data_album_id !== result[0].data_album_id) {
+        if (
+          !result[0] ||
+          initial[0].data_album_id !== result[0].data_album_id
+        ) {
           album_id_mismatch = true;
         }
       })
