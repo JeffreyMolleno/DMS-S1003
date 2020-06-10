@@ -11,8 +11,9 @@ export default function Sidebar() {
       variables: { type_subject: "SIDEBAR_LINKS" },
     }
   );
-  
+
   const classes = useStyles();
+
 
   return (
     <div

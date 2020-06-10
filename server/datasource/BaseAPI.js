@@ -4,6 +4,7 @@ const { genKey } = require("./keygen");
 class BaseAPI {
   constructor({ store }) {
     this.store = store;
+    this.tree = [];
   }
 
   initialize(config) {
@@ -177,20 +178,56 @@ class BaseAPI {
     };
   }
 
-  async getReferencedFieldsOfAlbumType({ data_album_type, master }) {
-    const result = master
-      ? await this.context.db.query(
-          `SELECt * FROM fields INNER JOIN album ON fields.album_id = album.data_album_id WHERE data_album_type = '${data_album_type}'  AND master_subject = '${master}'`
-        )
-      : await this.context.db.query(
-          `SELECt * FROM fields INNER JOIN album ON fields.album_id = album.data_album_id WHERE data_album_type = '${data_album_type}'`
-        );
+  async updateField(data) {
+    const result = await this.context.db.fields.update(
+      { field_id: data.fieldId },
+      { ...data.input }
+    );
+
+    return {
+      code: 202,
+      message: `Updated field of Id ${data.fieldId}`,
+      result: result,
+    };
+  }
+
+  async getReferencedFieldsOfAlbumType({ data_album_type, master, showChild }) {
+    let result = [];
+
+    if (master && showChild) {
+      result = await this.getTree({ data_album_type, master });
+    } else if (master) {
+      result = await this.getdbChilds({ data_album_type, master });
+    } else {
+      result = await this.context.db.query(
+        `SELECt * FROM fields INNER JOIN album ON fields.album_id = album.data_album_id WHERE data_album_type = '${data_album_type}'`
+      );
+    }
 
     return {
       code: 202,
       message: `Retrieving all registered data on album with id ${data_album_type}`,
       result: result,
     };
+  }
+
+  async getdbChilds({ data_album_type, master }) {
+    return await this.context.db.query(
+      `SELECt * FROM fields INNER JOIN album ON fields.album_id = album.data_album_id WHERE data_album_type = '${data_album_type}'  AND master_subject = '${master}'`
+    );
+  }
+
+  async getTree({ data_album_type, master }) {
+    let node = await this.getdbChilds({ data_album_type, master });
+
+    await Promise.all(
+      node.map(async (data) => {
+        await this.getTree({ data_album_type, master: data.main_subject });
+        this.tree.push(data);
+      })
+    );
+
+    return this.tree.reverse();
   }
 
   async consolidateNewData(data) {

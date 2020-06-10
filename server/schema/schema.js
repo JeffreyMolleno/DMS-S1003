@@ -47,6 +47,7 @@ const typeDefs = gql`
     getReferencedFieldsOfAlbumType(
       data_album_type: String!
       master: String
+      showChild: Boolean
     ): GeneralResponse
   }
 
@@ -65,18 +66,20 @@ const typeDefs = gql`
       input: [BatchData]
       verify_as: String!
     ): GeneralResponse
+    updateField(fieldId:String!,input:FieldInput!):GeneralResponse
   }
 
   input FieldInput {
-    field_type: String!
-    field_description: String
-    main_subject: String!
-    sub_definition: String!
-    is_dynamic: Boolean!
-    master_subject: String!
-    show: Boolean!
+    field_type: String #!
+    # field_description: String
+    main_subject: String #!
+    sub_definition: String #!
+    is_dynamic: Boolean #!
+    master_subject: String #!
+    show: Boolean #!
     calculation: String
     considerations: String
+    test:String
   }
 
   input AlbumDefinition {

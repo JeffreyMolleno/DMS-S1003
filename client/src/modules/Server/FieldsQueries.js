@@ -1,8 +1,12 @@
 import { gql } from "apollo-boost";
 
 export const getReferencedFieldsOfAlbumType = gql`
-  query($type_subject: String!, $master: String) {
-    getReferencedFieldsOfAlbumType(data_album_type: $type_subject, master: $master ) {
+  query($type_subject: String!, $master: String, $showChild: Boolean) {
+    getReferencedFieldsOfAlbumType(
+      data_album_type: $type_subject
+      master: $master
+      showChild: $showChild
+    ) {
       code
       message
       result {

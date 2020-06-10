@@ -34,10 +34,10 @@ const resolvers = {
       });
     },
     async getReferencedFieldsOfAlbumType(parent, args, context, info) {
-
       return await context.dataSources.Base.getReferencedFieldsOfAlbumType({
         data_album_type: args.data_album_type,
         master: args.master,
+        showChild: args.showChild,
       });
     },
   },
@@ -56,6 +56,9 @@ const resolvers = {
     },
     async validateDataCorelation(parent, args, context, info) {
       return await context.dataSources.Base.validateDataCorelation(args);
+    },
+    async updateField(parent, args, context, info) {
+      return await context.dataSources.Base.updateField(args);
     },
   },
   MutationResult: {

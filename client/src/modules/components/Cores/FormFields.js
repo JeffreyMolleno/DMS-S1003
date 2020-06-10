@@ -5,34 +5,59 @@ import {
   addBatchData,
 } from "../../Server/FieldsQueries";
 import { useDispatch, connect } from "react-redux";
-import {
-  setFieldAlbumProperty,
-  setFieldValue,
-} from "../../Redux/Reducers/Slice/FieldsSlice";
+import { setFieldValue } from "../../Redux/Reducers/Slice/FieldsSlice";
 import InputFields from "./InputFields";
 import FormDialog from "../Periperhals/FormDialog";
-import Step from "@material-ui/core/Step";
-import StepLabel from "@material-ui/core/StepLabel";
 
-export function FormFields({ fields_of_type, FieldsState, master }) {
-  const dispatch = useDispatch();
-
+export function FormFields({
+  fields_of_type,
+  FieldsState,
+  master,
+  showChild = false,
+}) {
   const { loading, error, data = [] } = useQuery(
     getReferencedFieldsOfAlbumType,
     {
-      variables: { type_subject: fields_of_type, master },
+      variables: { type_subject: fields_of_type, master, showChild },
     }
   );
 
+  const [styling, setStyling] = useState({
+    main: {
+      display: "grid",
+      gridTemplateAreas: `'initial'`,
+      justifyContent: "center",
+    },
+    elements: {},
+  });
+
+  const setConsiderationsStyling = (style) => {
+    // console.log("style", style);
+
+    // setStyling((prevState) => {
+    //   return {
+    //     ...prevState,
+    //   };
+    // });
+  };
+
   return (
-    !loading &&
-    // <React.Fragment>
-    // <br />
-    // <form>
-    // {loading && "Loading"}
-    data.getReferencedFieldsOfAlbumType &&
-    data.getReferencedFieldsOfAlbumType.result.map((recieved_data) =>
-      FormReducers(recieved_data)
+    !loading && (
+      // <React.Fragment>
+      // <br />
+      // <form>
+      // {loading && "Loading"}
+      <div
+        style={{
+          width: "100%",
+          ...styling.main,
+        }}
+      >
+        {data.getReferencedFieldsOfAlbumType &&
+          data.getReferencedFieldsOfAlbumType.result.map((recieved_data) =>
+            FormReducers(recieved_data, setConsiderationsStyling)
+          )}
+      </div>
     )
     // <br />
     // </form>
@@ -40,15 +65,22 @@ export function FormFields({ fields_of_type, FieldsState, master }) {
   );
 }
 
-export function FormReducers(data) {
+export function FormReducers(data, callback) {
   const considerations = data.considerations
     ? JSON.parse(data.considerations)
     : null;
 
+  if (considerations && considerations.Styling.position) {
+    callback(considerations.Styling.position);
+  }
+
   switch (data.field_type) {
     case "INPUT_FIELD_STRING":
       return (
-        <div key={data.field_id}>
+        <div
+          key={data.field_id}
+          style={considerations && considerations.Styling}
+        >
           <InputFields
             label_subject={data.main_subject}
             field_id={data.field_id}
@@ -61,7 +93,10 @@ export function FormReducers(data) {
       );
     case "INPUT_FIELD_PASSWORD":
       return (
-        <div key={data.field_id}>
+        <div
+          key={data.field_id}
+          style={considerations && considerations.Styling}
+        >
           <InputFields
             label_subject={data.main_subject}
             field_id={data.field_id}
@@ -74,7 +109,10 @@ export function FormReducers(data) {
       );
     case "BUTTON_SUBMIT_REGISTER":
       return (
-        <div key={data.field_id}>
+        <div
+          key={data.field_id}
+          style={considerations && considerations.Styling}
+        >
           <InputFields
             field_id={data.field_id}
             field_subject={data.main_subject}
@@ -86,7 +124,10 @@ export function FormReducers(data) {
       );
     case "BUTTON_SUBMIT_LOGIN":
       return (
-        <div key={data.field_id}>
+        <div
+          key={data.field_id}
+          style={considerations && considerations.Styling}
+        >
           <InputFields
             field_id={data.field_id}
             field_subject={data.main_subject}
@@ -102,7 +143,21 @@ export function FormReducers(data) {
           <FormDialog title={data.main_subject} />
         </div>
       );
-    // return data.main_subject;
+    case "FORM_HEADER":
+      return (
+        <div
+          style={{
+            color: "white",
+            backgroundColor: "blue",
+            fontSize: "0.8em",
+            width: "90%",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <h3>{data.main_subject}</h3>
+        </div>
+      );
     default:
       return null;
   }

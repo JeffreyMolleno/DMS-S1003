@@ -123,7 +123,7 @@ export function InputFields({
 
       {input_type === "text" && (
         <TextField
-          style={{ width: "230px", marginTop: "20px", borderRadius: "0%" }}
+          // style={{ width: "230px", marginTop: "20px", borderRadius: "0%" }}x
           id="outlined-basic"
           label={label_subject}
           type={input_type}
@@ -138,7 +138,7 @@ export function InputFields({
 
       {input_type === "password" && (
         <TextField
-          style={{ width: "230px", marginTop: "20px", borderRadius: "0%" }}
+          // style={{ width: "230px", marginTop: "20px", borderRadius: "0%" }}
           id="outlined-basic"
           label={label_subject}
           type={input_type}

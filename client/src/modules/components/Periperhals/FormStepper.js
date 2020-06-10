@@ -12,30 +12,6 @@ import {
 } from "../../Server/FieldsQueries";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: "100%",
-  },
-  button: {
-    marginRight: theme.spacing(1),
-  },
-  instructions: {
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1),
-  },
-}));
-
-function getSteps() {
-  // console.log("getting steps");
-  return [
-    "Personal Informations",
-    "Employee/Business Profile",
-    "Credits History",
-    "Collaterals",
-    "Loan Profile",
-  ];
-}
-
 function getStepContent(step) {
   switch (step) {
     case 0:
@@ -53,7 +29,6 @@ export default function FormStepper({ master, fields_of_type }) {
   const classes = useStyles();
   const [activeStep, setActiveStep] = React.useState(0);
   const [skipped, setSkipped] = React.useState(new Set());
-  // const steps = getSteps();
   const [steps, setSteps] = useState([]);
 
   const { loading, error1, data = [] } = useQuery(
@@ -139,6 +114,17 @@ export default function FormStepper({ master, fields_of_type }) {
             );
           })}
       </Stepper>
+
+      <div className={classes.form_fields_container}>
+        {steps[activeStep] && (
+          <FormFields
+            fields_of_type={"FORM_DIALOG_FIELDS"}
+            master={steps[activeStep]}
+            showChild={true}
+          />
+        )}
+      </div>
+
       <div>
         {activeStep === steps.length ? (
           <div>
@@ -172,7 +158,6 @@ export default function FormStepper({ master, fields_of_type }) {
                   Skip
                 </Button>
               )}
-
               <Button
                 variant="contained"
                 color="primary"
@@ -188,3 +173,23 @@ export default function FormStepper({ master, fields_of_type }) {
     </div>
   );
 }
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: "100%",
+  },
+  button: {
+    marginRight: theme.spacing(1),
+  },
+  instructions: {
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(1),
+  },
+  form_fields_container: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: "45px",
+    marginTop: "30px",
+  },
+}));
