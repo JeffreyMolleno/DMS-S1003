@@ -60,6 +60,9 @@ const resolvers = {
     async updateField(parent, args, context, info) {
       return await context.dataSources.Base.updateField(args);
     },
+    async updateFieldByName(parent, args, context, info) {
+      return await context.dataSources.Base.updateFieldByName(args);
+    },
   },
   MutationResult: {
     __resolveType(obj, context, info) {

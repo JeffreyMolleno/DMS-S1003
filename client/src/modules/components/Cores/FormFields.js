@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 import {
   getReferencedFieldsOfAlbumType,
@@ -8,6 +8,7 @@ import { useDispatch, connect } from "react-redux";
 import { setFieldValue } from "../../Redux/Reducers/Slice/FieldsSlice";
 import InputFields from "./InputFields";
 import FormDialog from "../Periperhals/FormDialog";
+import FormReducers from "./FormReducers";
 
 export function FormFields({
   fields_of_type,
@@ -29,17 +30,34 @@ export function FormFields({
       justifyContent: "center",
     },
     elements: {},
+    grid: {},
   });
 
   const setConsiderationsStyling = (style) => {
-    // console.log("style", style);
-
-    // setStyling((prevState) => {
-    //   return {
-    //     ...prevState,
-    //   };
-    // });
+    console.log("style", style);
+    setStyling((prevState) => {
+      return {
+        ...prevState,
+        grid: style,
+      };
+    });
   };
+
+  const formReducers = useMemo(
+    () => (
+      <FormReducers
+        fields={
+          data.getReferencedFieldsOfAlbumType &&
+          data.getReferencedFieldsOfAlbumType.result
+        }
+        styleFunc={setConsiderationsStyling}
+      />
+    ),
+    [
+      data.getReferencedFieldsOfAlbumType &&
+        data.getReferencedFieldsOfAlbumType.result,
+    ]
+  );
 
   return (
     !loading && (
@@ -51,116 +69,16 @@ export function FormFields({
         style={{
           width: "100%",
           ...styling.main,
+          gridTemplateAreas: styling.grid,
         }}
       >
-        {data.getReferencedFieldsOfAlbumType &&
-          data.getReferencedFieldsOfAlbumType.result.map((recieved_data) =>
-            FormReducers(recieved_data, setConsiderationsStyling)
-          )}
+        {data.getReferencedFieldsOfAlbumType && formReducers}
       </div>
     )
     // <br />
     // </form>
     // </React.Fragment>
   );
-}
-
-export function FormReducers(data, callback) {
-  const considerations = data.considerations
-    ? JSON.parse(data.considerations)
-    : null;
-
-  if (considerations && considerations.Styling.position) {
-    callback(considerations.Styling.position);
-  }
-
-  switch (data.field_type) {
-    case "INPUT_FIELD_STRING":
-      return (
-        <div
-          key={data.field_id}
-          style={considerations && considerations.Styling}
-        >
-          <InputFields
-            label_subject={data.main_subject}
-            field_id={data.field_id}
-            field_subject={data.main_subject}
-            // value={}
-            input_type={"text"}
-            considerations={considerations}
-          />
-        </div>
-      );
-    case "INPUT_FIELD_PASSWORD":
-      return (
-        <div
-          key={data.field_id}
-          style={considerations && considerations.Styling}
-        >
-          <InputFields
-            label_subject={data.main_subject}
-            field_id={data.field_id}
-            field_subject={data.main_subject}
-            // value={}
-            input_type={"password"}
-            considerations={considerations}
-          />
-        </div>
-      );
-    case "BUTTON_SUBMIT_REGISTER":
-      return (
-        <div
-          key={data.field_id}
-          style={considerations && considerations.Styling}
-        >
-          <InputFields
-            field_id={data.field_id}
-            field_subject={data.main_subject}
-            value={data.main_subject}
-            input_type={"button"}
-            considerations={considerations}
-          />
-        </div>
-      );
-    case "BUTTON_SUBMIT_LOGIN":
-      return (
-        <div
-          key={data.field_id}
-          style={considerations && considerations.Styling}
-        >
-          <InputFields
-            field_id={data.field_id}
-            field_subject={data.main_subject}
-            value={data.main_subject}
-            input_type={"button"}
-            considerations={considerations}
-          />
-        </div>
-      );
-    case "COMPONENT_FORM_DIALOG":
-      return (
-        <div>
-          <FormDialog title={data.main_subject} />
-        </div>
-      );
-    case "FORM_HEADER":
-      return (
-        <div
-          style={{
-            color: "white",
-            backgroundColor: "blue",
-            fontSize: "0.8em",
-            width: "90%",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <h3>{data.main_subject}</h3>
-        </div>
-      );
-    default:
-      return null;
-  }
 }
 
 const mapStateToProps = (state) => {

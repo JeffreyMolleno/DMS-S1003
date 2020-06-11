@@ -191,6 +191,19 @@ class BaseAPI {
     };
   }
 
+  async updateFieldByName(data) {
+    const result = await this.context.db.fields.update(
+      { main_subject: data.fieldSubject },
+      { ...data.input }
+    );
+
+    return {
+      code: 202,
+      message: `Updated field of subject ${data.fieldSubject}`,
+      result: result,
+    };
+  }
+
   async getReferencedFieldsOfAlbumType({ data_album_type, master, showChild }) {
     let result = [];
 
