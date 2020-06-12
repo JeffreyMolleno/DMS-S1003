@@ -1,13 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import FormDialog from "../Periperhals/FormDialog";
 import InputFields from "../Cores/InputFields";
-
+import { setFieldAlbumProperty } from "../../Redux/Reducers/Slice/FieldsSlice";
+import ArrayArrange from "../Cores/ArrayArrange";
 export default function FormReducers({ fields, styleFunc }) {
-  // const [style, setStyle] = useState({
-  //   gridTemplateAreaDefinition: `'initial'`,
-  // });
-
-  let styleArray = [];
   let gridTemplateAreaDefinition = {};
   let gridAreaName = [];
 
@@ -15,15 +11,19 @@ export default function FormReducers({ fields, styleFunc }) {
     if (forElement === "parent") {
       gridAreaName =
         styledata.grid && styledata.grid.family
-          ? setGridAreaName({
+          ? arrangeArrayToPosition({
               name: styledata.grid.family,
               array: gridAreaName,
-              orderOfAppearance: styledata.grid.order_of_appearance ?? "none",
+              orderOfAppearance:
+                (styledata.grid && styledata.grid.order_of_appearance) ??
+                "none",
             })
-          : setGridAreaName({
+          : arrangeArrayToPosition({
               name: data.main_subject,
               array: gridAreaName,
-              orderOfAppearance: styledata.grid.order_of_appearance ?? "none",
+              orderOfAppearance:
+                (styledata.grid && styledata.grid.order_of_appearance) ??
+                "none",
             });
 
       arrayCheck({
@@ -34,41 +34,19 @@ export default function FormReducers({ fields, styleFunc }) {
     }
   };
 
-  const setGridAreaName = ({ name, array, orderOfAppearance }) => {
-    let unique = true;
+  let positional_array = new ArrayArrange();
 
-    array.map((data) => {
-      if (name === data) {
-        return (unique = false);
-      }
+  const arrangeArrayToPosition = ({ name, array, orderOfAppearance }) => {
+    console.log(name, orderOfAppearance);
+
+    positional_array.addArrayPair({
+      child: name,
+      parent: orderOfAppearance.after ?? null,
     });
 
-    if (unique) {
-      if (orderOfAppearance !== "none" && orderOfAppearance.after) {
-        let after_index = array.indexOf(orderOfAppearance.after);
-
-        if (after_index >= 0) {
-          array.splice(after_index + 1, 0, name);
-        } else {
-          array.push(orderOfAppearance.after);
-        }
-        return array;
-      }
-
-      if (orderOfAppearance !== "none" && orderOfAppearance.before) {
-        let before_index = array.indexOf(orderOfAppearance.before);
-        if (before_index >= 0) {
-          array.splice(before_index - 1 > 0 ? before_index - 1 : 0, 0, name);
-        } else {
-          array.push(orderOfAppearance.before);
-        }
-        return array;
-      }
-
-      array.push(name);
-    }
-
-    return array;
+    return positional_array.arrangePairs({
+      pairs: positional_array.getArrayPairs(),
+    });
   };
 
   const arrayCheck = ({ position, family, fieldName }) => {
@@ -84,12 +62,9 @@ export default function FormReducers({ fields, styleFunc }) {
         }),
       };
     }
-
-    console.log(gridTemplateAreaDefinition);
   };
 
   const arrayRePosition = ({ position, array, fieldName }) => {
-    console.log(position, fieldName);
     switch (position) {
       case "left":
         array[0] = fieldName.split(" ").join("_");
@@ -121,9 +96,11 @@ export default function FormReducers({ fields, styleFunc }) {
     let finalGridAreaTemplate = "";
 
     gridAreaName.map((name) => {
-      finalGridAreaTemplate = finalGridAreaTemplate.concat(
-        "'" + styleDefinition[name].join(" ").concat("'")
-      );
+      if (styleDefinition[name]) {
+        finalGridAreaTemplate = finalGridAreaTemplate.concat(
+          "'" + styleDefinition[name].join(" ").concat("'")
+        );
+      }
     });
     return finalGridAreaTemplate;
   };
@@ -142,7 +119,6 @@ export default function FormReducers({ fields, styleFunc }) {
 
   const fieldOrganizer = ({ fields }) => {
     let StructuredFields = [];
-    // let FieldsStyle = [];
 
     fields.map((data) => {
       const considerations = data.considerations
@@ -150,7 +126,6 @@ export default function FormReducers({ fields, styleFunc }) {
         : null;
 
       if (considerations && considerations.Styling) {
-        // styleFunc(considerations.Styling.position);
         styleDefinition({
           styledata: considerations.Styling,
           data,
@@ -160,12 +135,6 @@ export default function FormReducers({ fields, styleFunc }) {
 
       switch (data.field_type) {
         case "INPUT_FIELD_STRING":
-          console.log(
-            styleBase({
-              data: considerations.Styling,
-              fieldSubject: data.main_subject,
-            })
-          );
           StructuredFields.push(
             <div
               key={data.field_id}
@@ -178,7 +147,6 @@ export default function FormReducers({ fields, styleFunc }) {
                 label_subject={data.main_subject}
                 field_id={data.field_id}
                 field_subject={data.main_subject}
-                // value={}
                 input_type={"text"}
                 considerations={considerations}
               />
@@ -189,7 +157,10 @@ export default function FormReducers({ fields, styleFunc }) {
           StructuredFields.push(
             <div
               key={data.field_id}
-              style={considerations && considerations.Styling.base}
+              style={styleBase({
+                data: considerations.Styling,
+                fieldSubject: data.main_subject,
+              })}
             >
               <InputFields
                 label_subject={data.main_subject}
@@ -206,7 +177,10 @@ export default function FormReducers({ fields, styleFunc }) {
           StructuredFields.push(
             <div
               key={data.field_id}
-              style={considerations && considerations.Styling.base}
+              style={styleBase({
+                data: considerations.Styling,
+                fieldSubject: data.main_subject,
+              })}
             >
               <InputFields
                 field_id={data.field_id}
@@ -222,7 +196,10 @@ export default function FormReducers({ fields, styleFunc }) {
           StructuredFields.push(
             <div
               key={data.field_id}
-              style={considerations && considerations.Styling.base}
+              style={styleBase({
+                data: considerations.Styling,
+                fieldSubject: data.main_subject,
+              })}
             >
               <InputFields
                 field_id={data.field_id}
@@ -277,9 +254,6 @@ export default function FormReducers({ fields, styleFunc }) {
           return null;
       }
     });
-
-    // console.log(StructuredFields);
-    // console.log('objective 001',gridAreaName.length, fields.length)
     if (gridAreaName.length) {
       styleFunc(
         styleNormalizer({
@@ -287,7 +261,6 @@ export default function FormReducers({ fields, styleFunc }) {
           gridAreaNames: gridAreaName,
         })
       );
-      // styleFunc(gridTemplateAreaDefinition);
     }
     return StructuredFields;
   };
