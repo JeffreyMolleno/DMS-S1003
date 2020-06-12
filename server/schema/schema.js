@@ -67,6 +67,7 @@ const typeDefs = gql`
       verify_as: String!
     ): GeneralResponse
     updateField(fieldId:String!,input:FieldInput!):GeneralResponse
+    updateFieldByName(fieldSubject:String!,input:FieldInput!):GeneralResponse
   }
 
   input FieldInput {
@@ -79,7 +80,6 @@ const typeDefs = gql`
     show: Boolean #!
     calculation: String
     considerations: String
-    test:String
   }
 
   input AlbumDefinition {
