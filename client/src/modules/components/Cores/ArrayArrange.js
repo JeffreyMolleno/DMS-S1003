@@ -28,7 +28,6 @@ export default class ArrayArrange {
       item_as_parent = this.find_child(item_as_parent, array);
       item_as_parent && right_wing.push(item_as_parent);
     }
-    console.log(left_wing.concat(right_wing));
     return left_wing.concat(right_wing);
   }
 

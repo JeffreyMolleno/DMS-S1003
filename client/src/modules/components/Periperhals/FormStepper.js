@@ -11,6 +11,8 @@ import {
   addBatchData,
 } from "../../Server/FieldsQueries";
 import { useQuery, useMutation } from "@apollo/react-hooks";
+import { useDispatch, connect } from "react-redux";
+import { ConvertToDataFields } from "../../Normalizer/ObjectNormalizer";
 
 function getStepContent(step) {
   switch (step) {
@@ -25,11 +27,18 @@ function getStepContent(step) {
   }
 }
 
-export default function FormStepper({ master, fields_of_type }) {
+export function FormStepper({
+  master,
+  fields_of_type,
+  FieldsState,
+  handleClose,
+}) {
   const classes = useStyles();
   const [activeStep, setActiveStep] = React.useState(0);
   const [skipped, setSkipped] = React.useState(new Set());
   const [steps, setSteps] = useState([]);
+
+  const [consolidateBatchData] = useMutation(addBatchData);
 
   const { loading, error1, data = [] } = useQuery(
     getReferencedFieldsOfAlbumType,
@@ -39,16 +48,17 @@ export default function FormStepper({ master, fields_of_type }) {
   );
 
   useEffect(() => {
-    setSteps(
-      !loading &&
-        data.getReferencedFieldsOfAlbumType.result.map((steps) => {
-          return steps.main_subject;
-        })
-    );
+    let steps_proccess = [];
+    !loading &&
+      data.getReferencedFieldsOfAlbumType.result.map((steps) => {
+        return steps_proccess.push(steps.main_subject);
+      });
+
+    setSteps([...steps_proccess, "Confirm Consolidations"]);
   }, [data]);
 
   const isStepOptional = (step) => {
-    return step === 1 || step === 2;
+    return step == !0 && step !== steps.length;
   };
 
   const isStepFailed = (step) => {
@@ -69,6 +79,19 @@ export default function FormStepper({ master, fields_of_type }) {
 
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
     setSkipped(newSkipped);
+  };
+
+  const handleSubmit = async ({ album }) => {
+    const consolidate_result = await consolidateBatchData({
+      variables: {
+        data_album_type: album,
+        input: ConvertToDataFields(FieldsState.input),
+      },
+    });
+
+    console.log(consolidate_result);
+
+    handleClose();
   };
 
   const handleBack = () => {
@@ -161,7 +184,11 @@ export default function FormStepper({ master, fields_of_type }) {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={handleNext}
+                onClick={
+                  activeStep === steps.length - 1
+                    ? () => handleSubmit({ album: FieldsState.data_album_type })
+                    : handleNext
+                }
                 className={classes.button}
               >
                 {activeStep === steps.length - 1 ? "Finish" : "Next"}
@@ -193,3 +220,14 @@ const useStyles = makeStyles((theme) => ({
     marginTop: "30px",
   },
 }));
+
+const mapStateToProps = (state) => {
+  return {
+    ...state,
+    FieldsState: state.Fields,
+  };
+};
+
+const mapDispatch = {};
+
+export default connect(mapStateToProps, mapDispatch)(FormStepper);

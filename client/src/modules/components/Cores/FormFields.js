@@ -34,7 +34,6 @@ export function FormFields({
   });
 
   const setConsiderationsStyling = (style) => {
-    console.log("style", style);
     setStyling((prevState) => {
       return {
         ...prevState,
@@ -61,10 +60,6 @@ export function FormFields({
 
   return (
     !loading && (
-      // <React.Fragment>
-      // <br />
-      // <form>
-      // {loading && "Loading"}
       <div
         style={{
           width: "100%",
@@ -72,12 +67,10 @@ export function FormFields({
           gridTemplateAreas: styling.grid,
         }}
       >
+        {loading && "Loading"}
         {data.getReferencedFieldsOfAlbumType && formReducers}
       </div>
     )
-    // <br />
-    // </form>
-    // </React.Fragment>
   );
 }
 
