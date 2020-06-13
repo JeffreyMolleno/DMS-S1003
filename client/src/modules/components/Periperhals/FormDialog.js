@@ -8,12 +8,17 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import FormStepper from "./FormStepper";
 
-export default function FormDialog({title}) {
+import { setFieldAlbumProperty } from "../../Redux/Reducers/Slice/FieldsSlice";
+import { useDispatch, connect } from "react-redux";
+
+export function FormDialog({ title, album_master }) {
   const [open, setOpen] = React.useState(false);
   const [fullWidth, setFullWidth] = React.useState(true);
   const [maxWidth, setMaxWidth] = React.useState("md");
+  const dispatch = useDispatch();
 
-  const handleClickOpen = () => {
+  const handleClickOpen = (data_reference) => {
+    dispatch(setFieldAlbumProperty(data_reference));
     setOpen(true);
   };
 
@@ -23,8 +28,12 @@ export default function FormDialog({title}) {
 
   return (
     <div>
-      <Button variant="outlined" color="primary" onClick={handleClickOpen}>
-      {title}
+      <Button
+        variant="outlined"
+        color="primary"
+        onClick={() => handleClickOpen(album_master)}
+      >
+        {title}
       </Button>
       <Dialog
         fullWidth={fullWidth}
@@ -47,7 +56,7 @@ export default function FormDialog({title}) {
             type="email"
             fullWidth
           /> */}
-          <FormStepper master={title} />
+          <FormStepper master={title} handleClose={() => handleClose()} />
         </DialogContent>
         <DialogActions>
           {/* <Button onClick={handleClose} color="primary">
@@ -61,3 +70,13 @@ export default function FormDialog({title}) {
     </div>
   );
 }
+
+const mapStateToProps = (state) => {
+  return {
+    ...state,
+  };
+};
+
+const mapDispatch = { setFieldAlbumProperty };
+
+export default connect(mapStateToProps, mapDispatch)(FormDialog);

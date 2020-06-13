@@ -37,8 +37,6 @@ export default function FormReducers({ fields, styleFunc }) {
   let positional_array = new ArrayArrange();
 
   const arrangeArrayToPosition = ({ name, array, orderOfAppearance }) => {
-    console.log(name, orderOfAppearance);
-
     positional_array.addArrayPair({
       child: name,
       parent: orderOfAppearance.after ?? null,
@@ -214,7 +212,10 @@ export default function FormReducers({ fields, styleFunc }) {
         case "COMPONENT_FORM_DIALOG":
           StructuredFields.push(
             <div>
-              <FormDialog title={data.main_subject} />
+              <FormDialog
+                title={data.main_subject}
+                album_master={data.master_subject}
+              />
             </div>
           );
           break;

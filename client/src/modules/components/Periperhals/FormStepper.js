@@ -11,6 +11,8 @@ import {
   addBatchData,
 } from "../../Server/FieldsQueries";
 import { useQuery, useMutation } from "@apollo/react-hooks";
+import { useDispatch, connect } from "react-redux";
+import { ConvertToDataFields } from "../../Normalizer/ObjectNormalizer";
 
 function getStepContent(step) {
   switch (step) {
@@ -25,11 +27,18 @@ function getStepContent(step) {
   }
 }
 
-export default function FormStepper({ master, fields_of_type }) {
+export function FormStepper({
+  master,
+  fields_of_type,
+  FieldsState,
+  handleClose,
+}) {
   const classes = useStyles();
   const [activeStep, setActiveStep] = React.useState(0);
   const [skipped, setSkipped] = React.useState(new Set());
   const [steps, setSteps] = useState([]);
+
+  const [consolidateBatchData] = useMutation(addBatchData);
 
   const { loading, error1, data = [] } = useQuery(
     getReferencedFieldsOfAlbumType,
@@ -72,7 +81,18 @@ export default function FormStepper({ master, fields_of_type }) {
     setSkipped(newSkipped);
   };
 
-  const handleSubmit = () => {};
+  const handleSubmit = async ({ album }) => {
+    const consolidate_result = await consolidateBatchData({
+      variables: {
+        data_album_type: album,
+        input: ConvertToDataFields(FieldsState.input),
+      },
+    });
+
+    console.log(consolidate_result);
+
+    handleClose();
+  };
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -165,7 +185,9 @@ export default function FormStepper({ master, fields_of_type }) {
                 variant="contained"
                 color="primary"
                 onClick={
-                  activeStep === steps.length - 1 ? handleSubmit : handleNext
+                  activeStep === steps.length - 1
+                    ? () => handleSubmit({ album: FieldsState.data_album_type })
+                    : handleNext
                 }
                 className={classes.button}
               >
@@ -198,3 +220,14 @@ const useStyles = makeStyles((theme) => ({
     marginTop: "30px",
   },
 }));
+
+const mapStateToProps = (state) => {
+  return {
+    ...state,
+    FieldsState: state.Fields,
+  };
+};
+
+const mapDispatch = {};
+
+export default connect(mapStateToProps, mapDispatch)(FormStepper);
