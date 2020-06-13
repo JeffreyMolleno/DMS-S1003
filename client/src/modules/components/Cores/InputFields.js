@@ -134,7 +134,12 @@ export function InputFields({
 
       {input_type === "text" && (
         <TextField
-          // style={{ width: "230px", marginTop: "20px", borderRadius: "0%" }}x
+          style={{
+            width: "100%",
+            // marginTop: "20px",
+            borderRadius: "0%",
+            // padding: "10px",
+          }}
           id="outlined-basic"
           label={label_subject}
           type={input_type}

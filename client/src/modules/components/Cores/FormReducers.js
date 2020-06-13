@@ -38,10 +38,14 @@ export default function FormReducers({ fields, styleFunc }) {
 
   const arrangeArrayToPosition = ({ name, array, orderOfAppearance }) => {
     positional_array.addArrayPair({
-      child: name,
+      child: name.split(" ").join("_"),
       parent: orderOfAppearance.after ?? null,
     });
-
+    console.log(
+      positional_array.arrangePairs({
+        pairs: positional_array.getArrayPairs(),
+      })
+    );
     return positional_array.arrangePairs({
       pairs: positional_array.getArrayPairs(),
     });
@@ -60,6 +64,8 @@ export default function FormReducers({ fields, styleFunc }) {
         }),
       };
     }
+
+    console.log(gridTemplateAreaDefinition);
   };
 
   const arrayRePosition = ({ position, array, fieldName }) => {
@@ -83,6 +89,15 @@ export default function FormReducers({ fields, styleFunc }) {
         array[3] = fieldName.split(" ").join("_");
         array[4] = fieldName.split(" ").join("_");
         array[5] = fieldName.split(" ").join("_");
+        break;
+      case "left_to_mid":
+        array[0] = fieldName.split(" ").join("_");
+        array[1] = fieldName.split(" ").join("_");
+        array[2] = fieldName.split(" ").join("_");
+        array[3] = fieldName.split(" ").join("_");
+        array[4] = "x";
+        array[5] = "x";
+
         break;
       default:
         break;
@@ -109,10 +124,24 @@ export default function FormReducers({ fields, styleFunc }) {
         ...data.base,
         gridArea: fieldSubject.split(" ").join("_"),
         justifySelf: "center",
+        width: width_determinant(data.grid && data.grid.position),
       };
     }
 
     return { ...data.base };
+  };
+
+  const width_determinant = (position) => {
+    console.log("position", position);
+    if (position === "left" || position === "middle" || position === "right") {
+      return "90%";
+    }
+    if (position === "full_width") {
+      return "96.5%";
+    }
+    if (position === "left_to_mid") {
+      return "95%";
+    }
   };
 
   const fieldOrganizer = ({ fields }) => {
@@ -136,10 +165,16 @@ export default function FormReducers({ fields, styleFunc }) {
           StructuredFields.push(
             <div
               key={data.field_id}
-              style={styleBase({
-                data: considerations.Styling,
-                fieldSubject: data.main_subject,
-              })}
+              style={{
+                ...styleBase({
+                  data: considerations.Styling,
+                  fieldSubject: data.main_subject,
+                }),
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: "10px",
+              }}
             >
               <InputFields
                 label_subject={data.main_subject}
