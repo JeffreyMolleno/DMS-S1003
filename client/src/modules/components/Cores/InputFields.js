@@ -58,6 +58,17 @@ export function InputFields({
         });
 
         return null;
+
+      case "register":
+        const consolidate_result = await consolidateBatchData({
+          variables: {
+            data_album_type: data_album_type,
+            input: ConvertToDataFields(FieldsState.input),
+          },
+        });
+
+        return null;
+
       case "verify":
         const verify_result = await validateDataCorelation({
           variables: {

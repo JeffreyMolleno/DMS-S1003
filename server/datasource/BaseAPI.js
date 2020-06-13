@@ -419,6 +419,23 @@ class BaseAPI {
         };
     return null;
   }
+
+  async getFieldOfName(fieldName) {
+    const data = await this.context.db.fields.where(
+      `main_subject = '${fieldName}'`
+    );
+    return data && data[0].main_subject
+      ? {
+          code: 201,
+          message: `Data availale`,
+          result: data,
+        }
+      : {
+          code: 304,
+          message: `Data not available`,
+          result: null,
+        };
+  }
 }
 
 module.exports = BaseAPI;

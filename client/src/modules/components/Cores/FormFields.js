@@ -64,7 +64,6 @@ export function FormFields({
       // <React.Fragment>
       // <br />
       // <form>
-      // {loading && "Loading"}
       <div
         style={{
           width: "100%",
@@ -72,6 +71,7 @@ export function FormFields({
           gridTemplateAreas: styling.grid,
         }}
       >
+        {loading && "Loading"}
         {data.getReferencedFieldsOfAlbumType && formReducers}
       </div>
     )

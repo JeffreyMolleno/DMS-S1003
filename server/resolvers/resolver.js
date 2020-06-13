@@ -40,6 +40,9 @@ const resolvers = {
         showChild: args.showChild,
       });
     },
+    async getFieldOfName(parent, args, context, info) {
+      return await context.dataSources.Base.getFieldOfName(args.fieldName);
+    },
   },
   Mutation: {
     async createNewField(parent, args, context, info) {

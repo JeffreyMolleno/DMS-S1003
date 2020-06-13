@@ -39,16 +39,17 @@ export default function FormStepper({ master, fields_of_type }) {
   );
 
   useEffect(() => {
-    setSteps(
-      !loading &&
-        data.getReferencedFieldsOfAlbumType.result.map((steps) => {
-          return steps.main_subject;
-        })
-    );
+    let steps_proccess = [];
+    !loading &&
+      data.getReferencedFieldsOfAlbumType.result.map((steps) => {
+        return steps_proccess.push(steps.main_subject);
+      });
+
+    setSteps([...steps_proccess, "Confirm Consolidations"]);
   }, [data]);
 
   const isStepOptional = (step) => {
-    return step === 1 || step === 2;
+    return step == !0 && step !== steps.length;
   };
 
   const isStepFailed = (step) => {
@@ -70,6 +71,8 @@ export default function FormStepper({ master, fields_of_type }) {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
     setSkipped(newSkipped);
   };
+
+  const handleSubmit = () => {};
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -161,7 +164,9 @@ export default function FormStepper({ master, fields_of_type }) {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={handleNext}
+                onClick={
+                  activeStep === steps.length - 1 ? handleSubmit : handleNext
+                }
                 className={classes.button}
               >
                 {activeStep === steps.length - 1 ? "Finish" : "Next"}

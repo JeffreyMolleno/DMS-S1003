@@ -49,6 +49,7 @@ const typeDefs = gql`
       master: String
       showChild: Boolean
     ): GeneralResponse
+    getFieldOfName(fieldName: String): GeneralResponse
   }
 
   type Mutation {
@@ -66,8 +67,11 @@ const typeDefs = gql`
       input: [BatchData]
       verify_as: String!
     ): GeneralResponse
-    updateField(fieldId:String!,input:FieldInput!):GeneralResponse
-    updateFieldByName(fieldSubject:String!,input:FieldInput!):GeneralResponse
+    updateField(fieldId: String!, input: FieldInput!): GeneralResponse
+    updateFieldByName(
+      fieldSubject: String!
+      input: FieldInput!
+    ): GeneralResponse
   }
 
   input FieldInput {
