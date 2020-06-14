@@ -15,6 +15,13 @@ import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
+import "date-fns";
+import DateFnsUtils from "@date-io/date-fns";
+import {
+  MuiPickersUtilsProvider,
+  KeyboardTimePicker,
+  KeyboardDatePicker,
+} from "@material-ui/pickers";
 
 export function InputFields({
   field_id,
@@ -27,6 +34,9 @@ export function InputFields({
 }) {
   const [consolidateBatchData] = useMutation(addBatchData);
   const [validateDataCorelation] = useMutation(validateData);
+  const [selectedDate, setSelectedDate] = React.useState(
+    new Date("2014-08-18T21:11:54")
+  );
 
   const dispatch = useDispatch();
   let history = useHistory();
@@ -114,6 +124,11 @@ export function InputFields({
     dispatch(setFieldValue({ [attribute]: value }));
   };
 
+  const handleDateChange = (date, attribute) => {
+    processInput({ value: date.toString(), attribute });
+    setSelectedDate(date);
+  };
+
   return (
     <React.Fragment>
       {input_type === "button" && (
@@ -132,13 +147,28 @@ export function InputFields({
         </Button>
       )}
 
-      {input_type === "text" && (
+      {(input_type === "text" || input_type === "number") && (
         <TextField
           style={{
             width: "100%",
-            // marginTop: "20px",
-            borderRadius: "0%",
-            // padding: "10px",
+          }}
+          id="outlined-basic"
+          label={label_subject}
+          type={input_type}
+          // autoComplete="current-password"
+          value={value}
+          onChange={(e) => {
+            processInput({ value: e.target.value, attribute: field_subject });
+          }}
+          variant="outlined"
+        />
+      )}
+
+      {input_type === "password" && (
+        <TextField
+          // style={{ width: "230px", marginTop: "20px", borderRadius: "0%" }}
+          style={{
+            width: "100%",
           }}
           id="outlined-basic"
           label={label_subject}
@@ -152,19 +182,25 @@ export function InputFields({
         />
       )}
 
-      {input_type === "password" && (
-        <TextField
-          // style={{ width: "230px", marginTop: "20px", borderRadius: "0%" }}
-          id="outlined-basic"
-          label={label_subject}
-          type={input_type}
-          autoComplete="current-password"
-          value={value}
-          onChange={(e) => {
-            processInput({ value: e.target.value, attribute: field_subject });
-          }}
-          variant="outlined"
-        />
+      {input_type === "date_picker" && (
+        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <KeyboardDatePicker
+            style={{
+              width: "100%",
+            }}
+            disableToolbar
+            variant="inline"
+            format="MM/dd/yyyy"
+            margin="normal"
+            id="date-picker-inline"
+            label={label_subject}
+            value={selectedDate}
+            onChange={(value) => handleDateChange(value, field_subject)}
+            KeyboardButtonProps={{
+              "aria-label": "change date",
+            }}
+          />
+        </MuiPickersUtilsProvider>
       )}
 
       <br />

@@ -3,28 +3,19 @@ import FormDialog from "../Periperhals/FormDialog";
 import InputFields from "../Cores/InputFields";
 import { setFieldAlbumProperty } from "../../Redux/Reducers/Slice/FieldsSlice";
 import ArrayArrange from "../Cores/ArrayArrange";
+
 export default function FormReducers({ fields, styleFunc }) {
   let gridTemplateAreaDefinition = {};
   let gridAreaName = [];
 
   const styleDefinition = ({ styledata, data, forElement }) => {
     if (forElement === "parent") {
-      gridAreaName =
-        styledata.grid && styledata.grid.family
-          ? arrangeArrayToPosition({
-              name: styledata.grid.family,
-              array: gridAreaName,
-              orderOfAppearance:
-                (styledata.grid && styledata.grid.order_of_appearance) ??
-                "none",
-            })
-          : arrangeArrayToPosition({
-              name: data.main_subject,
-              array: gridAreaName,
-              orderOfAppearance:
-                (styledata.grid && styledata.grid.order_of_appearance) ??
-                "none",
-            });
+      gridAreaName = arrangeArrayToPosition({
+        name: styledata.grid.family ?? data.main_subject,
+        array: gridAreaName,
+        orderOfAppearance:
+          (styledata.grid && styledata.grid.order_of_appearance) ?? "none",
+      });
 
       arrayCheck({
         position: styledata.grid && styledata.grid.position,
@@ -37,15 +28,15 @@ export default function FormReducers({ fields, styleFunc }) {
   let positional_array = new ArrayArrange();
 
   const arrangeArrayToPosition = ({ name, array, orderOfAppearance }) => {
+    // console.log(name, array, orderOfAppearance);
+
     positional_array.addArrayPair({
       child: name.split(" ").join("_"),
-      parent: orderOfAppearance.after ?? null,
+      parent:
+        orderOfAppearance.after &&
+        (orderOfAppearance.after.split(" ").join("_") ?? null),
     });
-    console.log(
-      positional_array.arrangePairs({
-        pairs: positional_array.getArrayPairs(),
-      })
-    );
+    console.log(positional_array.getArrayPairs());
     return positional_array.arrangePairs({
       pairs: positional_array.getArrayPairs(),
     });
@@ -64,40 +55,70 @@ export default function FormReducers({ fields, styleFunc }) {
         }),
       };
     }
-
-    console.log(gridTemplateAreaDefinition);
   };
 
   const arrayRePosition = ({ position, array, fieldName }) => {
+    const field_subject = fieldName
+      .replace(/[{()}]/g, "")
+      .split(" ")
+      .join("_");
+    console.log(fieldName, field_subject);
     switch (position) {
       case "left":
-        array[0] = fieldName.split(" ").join("_");
-        array[1] = fieldName.split(" ").join("_");
+        array[0] = field_subject;
+        array[1] = field_subject;
+        array[2] = array[2] ?? "x";
+        array[3] = array[3] ?? "x";
+        array[4] = array[4] ?? "x";
+        array[5] = array[5] ?? "x";
         break;
       case "middle":
-        array[2] = fieldName.split(" ").join("_");
-        array[3] = fieldName.split(" ").join("_");
+        array[0] = array[0] ?? "x";
+        array[1] = array[1] ?? "x";
+        array[2] = field_subject;
+        array[3] = field_subject;
+        array[4] = array[4] ?? "x";
+        array[5] = array[5] ?? "x";
         break;
       case "right":
-        array[4] = fieldName.split(" ").join("_");
-        array[5] = fieldName.split(" ").join("_");
+        array[0] = array[0] ?? "x";
+        array[1] = array[1] ?? "x";
+        array[2] = array[2] ?? "x";
+        array[3] = array[3] ?? "x";
+        array[4] = field_subject;
+        array[5] = field_subject;
         break;
       case "full_width":
-        array[0] = fieldName.split(" ").join("_");
-        array[1] = fieldName.split(" ").join("_");
-        array[2] = fieldName.split(" ").join("_");
-        array[3] = fieldName.split(" ").join("_");
-        array[4] = fieldName.split(" ").join("_");
-        array[5] = fieldName.split(" ").join("_");
+        array[0] = field_subject;
+        array[1] = field_subject;
+        array[2] = field_subject;
+        array[3] = field_subject;
+        array[4] = field_subject;
+        array[5] = field_subject;
         break;
       case "left_to_mid":
-        array[0] = fieldName.split(" ").join("_");
-        array[1] = fieldName.split(" ").join("_");
-        array[2] = fieldName.split(" ").join("_");
-        array[3] = fieldName.split(" ").join("_");
-        array[4] = "x";
-        array[5] = "x";
-
+        array[0] = field_subject;
+        array[1] = field_subject;
+        array[2] = field_subject;
+        array[3] = field_subject;
+        array[4] = array[4] ?? "x";
+        array[5] = array[5] ?? "x";
+        break;
+      case "left_half":
+        array[0] = field_subject;
+        array[1] = field_subject;
+        array[2] = field_subject;
+        array[3] = array[3] ?? "x";
+        array[4] = array[4] ?? "x";
+        array[5] = array[5] ?? "x";
+        break;
+      case "right_half":
+        array[0] = array[0] ?? "x";
+        array[1] = array[1] ?? "x";
+        array[2] = array[2] ?? "x";
+        array[3] = field_subject;
+        array[4] = field_subject;
+        array[5] = field_subject;
         break;
       default:
         break;
@@ -107,7 +128,6 @@ export default function FormReducers({ fields, styleFunc }) {
 
   const styleNormalizer = ({ styleDefinition, gridAreaNames }) => {
     let finalGridAreaTemplate = "";
-
     gridAreaName.map((name) => {
       if (styleDefinition[name]) {
         finalGridAreaTemplate = finalGridAreaTemplate.concat(
@@ -115,6 +135,8 @@ export default function FormReducers({ fields, styleFunc }) {
         );
       }
     });
+    console.log(finalGridAreaTemplate);
+
     return finalGridAreaTemplate;
   };
 
@@ -122,9 +144,17 @@ export default function FormReducers({ fields, styleFunc }) {
     if (data.grid) {
       return {
         ...data.base,
-        gridArea: fieldSubject.split(" ").join("_"),
-        justifySelf: "center",
-        width: width_determinant(data.grid && data.grid.position),
+        gridArea: fieldSubject
+          .replace(/[{()}]/g, "")
+          .split(" ")
+          .join("_"),
+        // justifySelf: "center",
+        width:
+          data.base.width ?? width_determinant(data.grid && data.grid.position),
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: "10px",
       };
     }
 
@@ -132,7 +162,6 @@ export default function FormReducers({ fields, styleFunc }) {
   };
 
   const width_determinant = (position) => {
-    console.log("position", position);
     if (position === "left" || position === "middle" || position === "right") {
       return "90%";
     }
@@ -141,6 +170,10 @@ export default function FormReducers({ fields, styleFunc }) {
     }
     if (position === "left_to_mid") {
       return "95%";
+    }
+
+    if (position === "left_half" || position === "right_half") {
+      return "93%";
     }
   };
 
@@ -170,10 +203,6 @@ export default function FormReducers({ fields, styleFunc }) {
                   data: considerations.Styling,
                   fieldSubject: data.main_subject,
                 }),
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                marginBottom: "10px",
               }}
             >
               <InputFields
@@ -186,14 +215,42 @@ export default function FormReducers({ fields, styleFunc }) {
             </div>
           );
           break;
+        case "INPUT_FIELD_INTEGER":
+          StructuredFields.push(
+            <div
+              key={data.field_id}
+              style={{
+                ...styleBase({
+                  data: considerations.Styling,
+                  fieldSubject: data.main_subject,
+                }),
+              }}
+            >
+              <InputFields
+                label_subject={data.main_subject}
+                field_id={data.field_id}
+                field_subject={data.main_subject}
+                input_type={"number"}
+                considerations={considerations}
+              />
+            </div>
+          );
+          break;
         case "INPUT_FIELD_PASSWORD":
           StructuredFields.push(
             <div
               key={data.field_id}
-              style={styleBase({
-                data: considerations.Styling,
-                fieldSubject: data.main_subject,
-              })}
+              style={{
+                ...styleBase({
+                  data: considerations.Styling,
+                  fieldSubject: data.main_subject,
+                }),
+                // display: "flex",
+                // justifyContent: "center",
+                // alignItems: "center",
+                // marginBottom: "10px",
+                // width: "260px",
+              }}
             >
               <InputFields
                 label_subject={data.main_subject}
@@ -286,11 +343,39 @@ export default function FormReducers({ fields, styleFunc }) {
             </div>
           );
           break;
+        case "DATE_PICKER":
+          StructuredFields.push(
+            <div
+              key={data.field_id}
+              style={{
+                ...styleBase({
+                  data: considerations.Styling,
+                  fieldSubject: data.main_subject,
+                }),
+              }}
+            >
+              <InputFields
+                label_subject={data.main_subject}
+                field_id={data.field_id}
+                field_subject={data.main_subject}
+                input_type={"date_picker"}
+                considerations={considerations}
+              />
+            </div>
+          );
+          break;
         default:
           return null;
       }
     });
     if (gridAreaName.length) {
+      // console.log(
+      //   styleNormalizer({
+      //     styleDefinition: gridTemplateAreaDefinition,
+      //     gridAreaNames: gridAreaName,
+      //   })
+      // );
+      console.log(gridTemplateAreaDefinition);
       styleFunc(
         styleNormalizer({
           styleDefinition: gridTemplateAreaDefinition,

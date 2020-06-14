@@ -22,6 +22,7 @@ export default class ArrayArrange {
     let right_wing = [];
     let left_wing = [];
 
+    let childd = this.find_child(item_as_parent, array);
     while (item_as_child || item_as_parent) {
       item_as_child = this.find_parent(item_as_child, array);
       item_as_child && left_wing.unshift(item_as_child);
@@ -34,6 +35,7 @@ export default class ArrayArrange {
   find_parent(item_child, array) {
     for (let i = 0; i < array.length; i++) {
       if (array[i][0] === item_child) {
+        console.log(array[i][1]);
         return array[i][1];
       }
     }
