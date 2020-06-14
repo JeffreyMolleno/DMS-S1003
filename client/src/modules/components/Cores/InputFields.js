@@ -35,7 +35,7 @@ export function InputFields({
   const [consolidateBatchData] = useMutation(addBatchData);
   const [validateDataCorelation] = useMutation(validateData);
   const [selectedDate, setSelectedDate] = React.useState(
-    new Date("2014-08-18T21:11:54")
+    new Date("2020-06-18T21:11:54")
   );
 
   const dispatch = useDispatch();
@@ -104,7 +104,6 @@ export function InputFields({
   const postProcess = async ({ post, result_code }) => {
     switch (result_code) {
       case 202: // validated
-        // alert(post.success.prompt);
         if (post.success.redirect_to) {
           history.push(post.success.redirect_to);
         }
@@ -153,9 +152,8 @@ export function InputFields({
             width: "100%",
           }}
           id="outlined-basic"
-          label={label_subject}
+          label={label_subject.replace(/\%([^)]+)\%/g, "")}
           type={input_type}
-          // autoComplete="current-password"
           value={value}
           onChange={(e) => {
             processInput({ value: e.target.value, attribute: field_subject });
@@ -166,12 +164,11 @@ export function InputFields({
 
       {input_type === "password" && (
         <TextField
-          // style={{ width: "230px", marginTop: "20px", borderRadius: "0%" }}
           style={{
             width: "100%",
           }}
           id="outlined-basic"
-          label={label_subject}
+          label={label_subject.replace(/\%([^)]+)\%/g, "")}
           type={input_type}
           autoComplete="current-password"
           value={value}
@@ -193,7 +190,7 @@ export function InputFields({
             format="MM/dd/yyyy"
             margin="normal"
             id="date-picker-inline"
-            label={label_subject}
+            label={label_subject.replace(/\%([^)]+)\%/g, "")}
             value={selectedDate}
             onChange={(value) => handleDateChange(value, field_subject)}
             KeyboardButtonProps={{
@@ -224,7 +221,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-// const mapDispatchtoProps = { setFieldAlbumProperty };
 const mapDispatch = { setFieldAlbumProperty, setFieldValue };
 
 export default connect(mapStateToProps, mapDispatch)(InputFields);

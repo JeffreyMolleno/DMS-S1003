@@ -59,10 +59,10 @@ export default function FormReducers({ fields, styleFunc }) {
 
   const arrayRePosition = ({ position, array, fieldName }) => {
     const field_subject = fieldName
-      .replace(/[{()}]/g, "")
+      .replace(/[{()},%]/g, "")
       .split(" ")
       .join("_");
-    console.log(fieldName, field_subject);
+
     switch (position) {
       case "left":
         array[0] = field_subject;
@@ -145,10 +145,9 @@ export default function FormReducers({ fields, styleFunc }) {
       return {
         ...data.base,
         gridArea: fieldSubject
-          .replace(/[{()}]/g, "")
+          .replace(/[{()},%]/g, "")
           .split(" ")
           .join("_"),
-        // justifySelf: "center",
         width:
           data.base.width ?? width_determinant(data.grid && data.grid.position),
         display: "flex",
