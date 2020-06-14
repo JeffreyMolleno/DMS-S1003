@@ -82,15 +82,16 @@ export function FormStepper({
   };
 
   const handleSubmit = async ({ album }) => {
-    const consolidate_result = await consolidateBatchData({
-      variables: {
-        data_album_type: album,
-        input: ConvertToDataFields(FieldsState.input),
-      },
-    });
+    if (FieldsState.input.length && album) {
+      const consolidate_result = await consolidateBatchData({
+        variables: {
+          data_album_type: album,
+          input: ConvertToDataFields(FieldsState.input),
+        },
+      });
 
-    console.log(consolidate_result);
-
+      console.log(consolidate_result);
+    }
     handleClose();
   };
 

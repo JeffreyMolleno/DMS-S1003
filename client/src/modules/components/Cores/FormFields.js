@@ -28,6 +28,8 @@ export function FormFields({
       display: "grid",
       gridTemplateAreas: `'initial'`,
       justifyContent: "center",
+      justifyItems: "center",
+      gridAutoColumns: "14%",
     },
     elements: {},
     grid: {},
