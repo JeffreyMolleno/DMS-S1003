@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const FieldsSlice = createSlice({
   name: "Fields",
-  initialState: { input: [] },
+  initialState: { input: [], reset: false },
   reducers: {
     setFieldAlbumProperty(state, action) {
       return {
@@ -17,11 +17,34 @@ const FieldsSlice = createSlice({
           ...state.input,
           ...action.payload,
         },
+        reset: false,
       };
+    },
+    deleteFieldValue(state, action) {
+      const proc_state = Object.assign({}, state);
+
+      const { input: parentValue, ...noChild } = proc_state;
+      const {
+        [action.payload.attribute]: removeValue,
+        ...childWithout
+      } = parentValue;
+      const final_state = { ...noChild, input: childWithout };
+
+      return { ...final_state, reset: false };
+    },
+
+    deleteAllFieldValue(state, action) {
+      console.log("here deleting");
+      return { ...state, input: [], reset: true };
     },
   },
 });
 
-export const { setFieldAlbumProperty, setFieldValue } = FieldsSlice.actions;
+export const {
+  setFieldAlbumProperty,
+  setFieldValue,
+  deleteFieldValue,
+  deleteAllFieldValue,
+} = FieldsSlice.actions;
 
 export default FieldsSlice.reducer;

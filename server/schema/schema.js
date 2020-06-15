@@ -42,7 +42,7 @@ const typeDefs = gql`
 
   type Query {
     getFields: [Fields]
-    getAlbums: GeneralResponse
+    getAlbums(data_album_type: String): GeneralResponse
     getReferenceDataOfAlbum(albumId: ID): GeneralResponse
     getReferencedFieldsOfAlbumType(
       data_album_type: String!

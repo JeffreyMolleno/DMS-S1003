@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "@apollo/react-hooks";
 import {
   setFieldAlbumProperty,
   setFieldValue,
+  deleteFieldValue,
 } from "../../Redux/Reducers/Slice/FieldsSlice";
 import {
   getReferencedDataOfAlbumType,
@@ -35,7 +36,7 @@ export function InputFields({
   const [consolidateBatchData] = useMutation(addBatchData);
   const [validateDataCorelation] = useMutation(validateData);
   const [selectedDate, setSelectedDate] = React.useState(
-    new Date("2020-06-18T21:11:54")
+    // new Date("2020-06-18T21:11:54")
   );
 
   const dispatch = useDispatch();
@@ -119,6 +120,10 @@ export function InputFields({
     }
   };
 
+  const preFormDataGet = ({ field_subject }) => {
+    return FieldsState.input[field_subject] && FieldsState.input[field_subject];
+  };
+
   const processInput = ({ value, attribute }) => {
     dispatch(setFieldValue({ [attribute]: value }));
   };
@@ -154,7 +159,11 @@ export function InputFields({
           id="outlined-basic"
           label={label_subject.replace(/\%([^)]+)\%/g, "")}
           type={input_type}
-          value={value}
+          value={
+            FieldsState.reset
+              ? ""
+              : preFormDataGet({ field_subject: label_subject })
+          }
           onChange={(e) => {
             processInput({ value: e.target.value, attribute: field_subject });
           }}
@@ -221,6 +230,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatch = { setFieldAlbumProperty, setFieldValue };
+const mapDispatch = { setFieldAlbumProperty, setFieldValue, deleteFieldValue };
 
 export default connect(mapStateToProps, mapDispatch)(InputFields);

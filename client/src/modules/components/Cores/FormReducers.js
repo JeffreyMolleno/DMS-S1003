@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import FormDialog from "../Periperhals/FormDialog";
 import InputFields from "../Cores/InputFields";
-import { setFieldAlbumProperty } from "../../Redux/Reducers/Slice/FieldsSlice";
 import ArrayArrange from "../Cores/ArrayArrange";
 
 export default function FormReducers({ fields, styleFunc }) {
@@ -244,18 +243,12 @@ export default function FormReducers({ fields, styleFunc }) {
                   data: considerations.Styling,
                   fieldSubject: data.main_subject,
                 }),
-                // display: "flex",
-                // justifyContent: "center",
-                // alignItems: "center",
-                // marginBottom: "10px",
-                // width: "260px",
               }}
             >
               <InputFields
                 label_subject={data.main_subject}
                 field_id={data.field_id}
                 field_subject={data.main_subject}
-                // value={}
                 input_type={"password"}
                 considerations={considerations}
               />
@@ -368,13 +361,6 @@ export default function FormReducers({ fields, styleFunc }) {
       }
     });
     if (gridAreaName.length) {
-      // console.log(
-      //   styleNormalizer({
-      //     styleDefinition: gridTemplateAreaDefinition,
-      //     gridAreaNames: gridAreaName,
-      //   })
-      // );
-      console.log(gridTemplateAreaDefinition);
       styleFunc(
         styleNormalizer({
           styleDefinition: gridTemplateAreaDefinition,
@@ -389,3 +375,4 @@ export default function FormReducers({ fields, styleFunc }) {
 
   return <>{fieldsProcesss}</>;
 }
+
