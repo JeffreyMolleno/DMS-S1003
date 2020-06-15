@@ -25,8 +25,10 @@ const resolvers = {
     async getFields(_, __, context) {
       return await context.dataSources.Base.getAllFields();
     },
-    async getAlbums(_, __, context) {
-      return await context.dataSources.Base.getAlbums();
+    async getAlbums(_, args, context) {
+      return await context.dataSources.Base.getAlbums({
+        data_album_type: args.data_album_type,
+      });
     },
     async getReferenceDataOfAlbum(parent, args, context, info) {
       return await context.dataSources.Base.getReferencedDataOfAlbum({

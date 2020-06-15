@@ -157,11 +157,18 @@ class BaseAPI {
     }
   }
 
-  async getAlbums() {
-    const result = await this.context.db.query(`SELECT * FROM album`);
+  async getAlbums({ data_album_type }) {
+    console.log("data_album_type: ", data_album_type);
+    const result = await this.context.db.query(
+      data_album_type
+        ? `SELECT * FROM album WHERE data_album_type = '${data_album_type}'`
+        : `SELECT * FROM album`
+    );
     return {
       code: 202,
-      message: `Retrieving all registered data albums definitions`,
+      message: data_album_type
+        ? `Retrieving all registered data of album ${data_album_type} `
+        : `Retrieving all registered data albums definitions and correlated data`,
       result: result,
     };
   }

@@ -13,6 +13,7 @@ import {
 import { useQuery, useMutation } from "@apollo/react-hooks";
 import { useDispatch, connect } from "react-redux";
 import { ConvertToDataFields } from "../../Normalizer/ObjectNormalizer";
+import { deleteAllFieldValue } from "../../Redux/Reducers/Slice/FieldsSlice";
 
 function getStepContent(step) {
   switch (step) {
@@ -37,8 +38,8 @@ export function FormStepper({
   const [activeStep, setActiveStep] = React.useState(0);
   const [skipped, setSkipped] = React.useState(new Set());
   const [steps, setSteps] = useState([]);
-
   const [consolidateBatchData] = useMutation(addBatchData);
+  const dispatch = useDispatch();
 
   const { loading, error1, data = [] } = useQuery(
     getReferencedFieldsOfAlbumType,
@@ -82,7 +83,7 @@ export function FormStepper({
   };
 
   const handleSubmit = async ({ album }) => {
-    if (FieldsState.input.length && album) {
+    if (FieldsState.input !== [] && album) {
       const consolidate_result = await consolidateBatchData({
         variables: {
           data_album_type: album,
@@ -90,8 +91,9 @@ export function FormStepper({
         },
       });
 
-      console.log(consolidate_result);
+      handleReset();
     }
+
     handleClose();
   };
 
@@ -115,6 +117,7 @@ export function FormStepper({
   };
 
   const handleReset = () => {
+    dispatch(deleteAllFieldValue());
     setActiveStep(0);
   };
 
@@ -155,45 +158,63 @@ export function FormStepper({
             <Typography className={classes.instructions}>
               All steps completed - you&apos;re finished
             </Typography>
-            <Button onClick={handleReset} className={classes.button}>
-              Reset
-            </Button>
           </div>
         ) : (
           <div>
             <Typography className={classes.instructions}>
               {getStepContent(activeStep)}
             </Typography>
-            <div>
-              <Button
-                disabled={activeStep === 0}
-                onClick={handleBack}
-                className={classes.button}
-              >
-                Back
-              </Button>
-              {isStepOptional(activeStep) && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                aligItems: "center",
+                flexDirection: "row",
+              }}
+            >
+              <div>
+                <Button
+                  disabled={activeStep === 0}
+                  onClick={handleBack}
+                  className={classes.button}
+                >
+                  Back
+                </Button>
+
+                {isStepOptional(activeStep) && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSkip}
+                    className={classes.button}
+                  >
+                    Skip
+                  </Button>
+                )}
+
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={handleSkip}
+                  onClick={
+                    activeStep === steps.length - 1
+                      ? () =>
+                          handleSubmit({ album: FieldsState.data_album_type })
+                      : handleNext
+                  }
                   className={classes.button}
                 >
-                  Skip
+                  {activeStep === steps.length - 1 ? "Finish" : "Next"}
                 </Button>
-              )}
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={
-                  activeStep === steps.length - 1
-                    ? () => handleSubmit({ album: FieldsState.data_album_type })
-                    : handleNext
-                }
-                className={classes.button}
-              >
-                {activeStep === steps.length - 1 ? "Finish" : "Next"}
-              </Button>
+              </div>
+              <div>
+                <Button
+                  // disabled={FieldsState.input === {}}
+                  onClick={handleReset}
+                  className={classes.button}
+                >
+                  Reset
+                </Button>
+              </div>
             </div>
           </div>
         )}
@@ -229,6 +250,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatch = {};
+const mapDispatch = { deleteAllFieldValue };
 
 export default connect(mapStateToProps, mapDispatch)(FormStepper);
