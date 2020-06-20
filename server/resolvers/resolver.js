@@ -21,6 +21,35 @@ const resolvers = {
       return result[0].type_subject;
     },
   },
+  DynamicData: {
+    async masters(parent, args, context, info) {
+      // console.log(parent)
+      // if (parent.masters) {
+      //   return parent.masters;
+      // }
+      const result = await context.dataSources.Base.getMasters({
+        album_id: parent.album_id,
+      });
+      return result;
+    },
+  },
+  // MastersBatchCollection: {
+  //   async batch_values(parent, args, context, info) {
+  //     const result = await context.dataSources.Base.getBatchSet({
+  //       master: parent.master_field,
+  //     });
+  //     return result;
+  //   },
+  // },
+  FieldValueBatchSet: {
+    async fields_values_set(parent, args, context, info) {
+      const result = await context.dataSources.Base.getBatchFieldValues({
+        batch_id: parent.batch_id,
+      });
+
+      return result;
+    },
+  },
   Query: {
     async getFields(_, __, context) {
       return await context.dataSources.Base.getAllFields();
@@ -68,9 +97,14 @@ const resolvers = {
     async updateFieldByName(parent, args, context, info) {
       return await context.dataSources.Base.updateFieldByName(args);
     },
+    async addBatchDynamicData(parent, args, context, info) {
+      return await context.dataSources.Base.addBatchDynamicData(args);
+    },
   },
   MutationResult: {
     __resolveType(obj, context, info) {
+      // console.log(obj);
+      if (obj.dynamic_data) return "DynamicData";
       if (obj.field_type) return "Fields";
       if (obj.data_id !== undefined) return "Data";
       if (obj.data_album_type) return "DataAlbum";

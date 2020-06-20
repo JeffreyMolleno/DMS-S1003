@@ -13,6 +13,11 @@ exports.up = (pgm) => {
       notNull: true,
       reference: "album",
     },
+    batch_id: {
+      type: "test",
+      notNull: true,
+      reference: "album",
+    },
     holding_value: {
       type: "text",
       notNull: true,

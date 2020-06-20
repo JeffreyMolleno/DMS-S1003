@@ -5,7 +5,7 @@ const typeDefs = gql`
   scalar ValueType
   scalar Date
 
-  union MutationResult = Fields | Data | DataAlbum
+  union MutationResult = Fields | Data | DataAlbum | DynamicData
 
   type Fields {
     field_id: ID!
@@ -25,6 +25,27 @@ const typeDefs = gql`
     data_album_id: ID!
     field_subject: String!
     value: String!
+  }
+
+  type DynamicData {
+    album_id: String
+    masters: [MastersBatchCollection]
+  }
+
+  type MastersBatchCollection {
+    master_field: String
+    batch_values: [FieldValueBatchSet]
+  }
+
+  type FieldValueBatchSet {
+    batch_id: String
+    fields_values_set: [FieldValueSet]
+  }
+
+  type FieldValueSet {
+    dynad_id: String
+    field_subject: String
+    holding_value: String
   }
 
   type ValueStructure {
@@ -72,6 +93,15 @@ const typeDefs = gql`
       fieldSubject: String!
       input: FieldInput!
     ): GeneralResponse
+    addBatchDynamicData(
+      album_id: String
+      input: [DynamicDataInput]
+    ): GeneralResponse
+  }
+
+  input DynamicDataInput {
+    master_field: String
+    field_value: [BatchData]
   }
 
   input FieldInput {
