@@ -10,12 +10,7 @@ import InputFields from "./InputFields";
 import FormDialog from "../Periperhals/FormDialog";
 import FormReducers from "./FormReducers";
 
-export function FormFields({
-  fields_of_type,
-  FieldsState,
-  master,
-  showChild = false,
-}) {
+export function FormFields({ fields_of_type, master, showChild = false }) {
   const { loading, error, data = [] } = useQuery(
     getReferencedFieldsOfAlbumType,
     {
@@ -52,6 +47,7 @@ export function FormFields({
           data.getReferencedFieldsOfAlbumType.result
         }
         styleFunc={setConsiderationsStyling}
+        fields_of_type={fields_of_type}
       />
     ),
     [

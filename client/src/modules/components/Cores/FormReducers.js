@@ -2,8 +2,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import FormDialog from "../Periperhals/FormDialog";
 import InputFields from "../Cores/InputFields";
 import ArrayArrange from "../Cores/ArrayArrange";
-
-export default function FormReducers({ fields, styleFunc }) {
+import FormFields from "../Cores/FormFields";
+import DynamicFields from "../Periperhals/DynamicFields";
+export default function FormReducers({ fields, styleFunc, fields_of_type }) {
   let gridTemplateAreaDefinition = {};
   let gridAreaName = [];
 
@@ -14,6 +15,8 @@ export default function FormReducers({ fields, styleFunc }) {
         array: gridAreaName,
         orderOfAppearance:
           (styledata.grid && styledata.grid.order_of_appearance) ?? "none",
+        is_dynamic: data.is_dynamic,
+        parent: data.master_subject,
       });
 
       arrayCheck({
@@ -26,24 +29,52 @@ export default function FormReducers({ fields, styleFunc }) {
 
   let positional_array = new ArrayArrange();
 
-  const arrangeArrayToPosition = ({ name, array, orderOfAppearance }) => {
-    // console.log(name, array, orderOfAppearance);
+  const arrangeArrayToPosition = ({
+    name,
+    array,
+    orderOfAppearance,
+    is_dynamic = false,
+    parent = null,
+  }) => {
+    if (parent) {
+      positional_array.add_parent_to_collection({ parent });
+    }
 
+    if (is_dynamic) {
+      positional_array.item_to_add_for_dynamic({
+        item_to_add: "DYNAMIC_FIELD_ADD",
+        parent: name.split(" ").join("_"),
+      });
+
+      arrayCheck({
+        position: "full_width",
+        family: null,
+        fieldName: "DYNAMIC_FIELD_ADD",
+      });
+    }
+
+    // console.log(name, array, orderOfAppearance);
     positional_array.addArrayPair({
       child: name.split(" ").join("_"),
       parent:
         orderOfAppearance.after &&
         (orderOfAppearance.after.split(" ").join("_") ?? null),
     });
-    console.log(positional_array.getArrayPairs());
-    return positional_array.arrangePairs({
-      pairs: positional_array.getArrayPairs(),
+
+    let rework = positional_array.reworkArray({
+      array: positional_array.arrangePairs({
+        pairs: positional_array.getArrayPairs(),
+      }),
+      additionals: positional_array.getAdditionals(),
+      parents: positional_array.getParentCollection(),
     });
+
+    console.log({ rework });
+    return rework;
   };
 
   const arrayCheck = ({ position, family, fieldName }) => {
-    let definition = gridTemplateAreaDefinition[family] ?? "";
-
+    // let definition = gridTemplateAreaDefinition[family] ?? "";
     if (position) {
       gridTemplateAreaDefinition = {
         ...gridTemplateAreaDefinition,
@@ -53,6 +84,8 @@ export default function FormReducers({ fields, styleFunc }) {
           fieldName,
         }),
       };
+
+      console.log({ gridTemplateAreaDefinition });
     }
   };
 
@@ -134,8 +167,6 @@ export default function FormReducers({ fields, styleFunc }) {
         );
       }
     });
-    console.log(finalGridAreaTemplate);
-
     return finalGridAreaTemplate;
   };
 
@@ -189,6 +220,27 @@ export default function FormReducers({ fields, styleFunc }) {
           data,
           forElement: "parent",
         });
+      }
+
+      if (data.is_dynamic) {
+        StructuredFields.push(
+          <div
+            style={{
+              ...styleBase({
+                data: {
+                  grid: { position: "full_width" },
+                  base: {},
+                },
+                fieldSubject: "DYNAMIC_FIELD_ADD",
+              }),
+            }}
+          >
+            <DynamicFields
+              parent_field={data.main_subject}
+              fields_of_type={fields_of_type}
+            />
+          </div>
+        );
       }
 
       switch (data.field_type) {
@@ -375,4 +427,3 @@ export default function FormReducers({ fields, styleFunc }) {
 
   return <>{fieldsProcesss}</>;
 }
-

@@ -1,6 +1,10 @@
 export default class ArrayArrange {
   constructor() {
     this.pairs = [];
+    this.child_counter = [];
+    this.dynamic_parent = [];
+    this.parent_collection = [];
+    this.additional_item_for_dynamic = [];
   }
 
   addArrayPair({ child, parent }) {
@@ -35,7 +39,6 @@ export default class ArrayArrange {
   find_parent(item_child, array) {
     for (let i = 0; i < array.length; i++) {
       if (array[i][0] === item_child) {
-        console.log(array[i][1]);
         return array[i][1];
       }
     }
@@ -49,5 +52,66 @@ export default class ArrayArrange {
       }
     }
     return false;
+  }
+
+  add_parent_to_collection({ parent }) {
+    return this.parent_collection.push(parent);
+  }
+
+  getParentCollection() {
+    return this.parent_collection;
+  }
+
+  item_to_add_for_dynamic({ item_to_add, parent }) {
+    let unique = true;
+
+    this.additional_item_for_dynamic.map((data, index) => {
+      if (data.parent === parent) {
+        unique = false;
+        this.additional_item_for_dynamic[index] = { item_to_add, parent };
+      }
+    });
+
+    if (unique) {
+      this.additional_item_for_dynamic.push({ item_to_add, parent });
+    }
+
+    return null;
+  }
+
+  getAdditionals() {
+    return this.additional_item_for_dynamic;
+  }
+
+  reworkArray({ array, additionals, parents }) {
+    console.log({ array, additionals, parents });
+
+    // remove current reference additionals
+    additionals.map((additional) => {
+      while (array.indexOf(additional.item_to_add) > -1) {
+        array.splice(array.indexOf(additional.item_to_add), 0);
+      }
+    });
+
+    // add additionals with respect to new parent count and dynamic parent declarations
+    additionals.map((additional) => {
+      //  get number of parents of type additional.parent
+      array.splice(
+        array.indexOf(additional.parent) +
+          this.get_number_of_parent({
+            array: parents,
+            reference: additional.parent,
+          }) +
+          1,
+        0,
+        additional.item_to_add
+      );
+    });
+
+    return array;
+  }
+
+  get_number_of_parent({ array, reference }) {
+    return array.filter((data) => data === reference).length;
   }
 }

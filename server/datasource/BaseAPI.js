@@ -158,7 +158,6 @@ class BaseAPI {
   }
 
   async getAlbums({ data_album_type }) {
-    // console.log("data_album_type: ", data_album_type);
     const result = await this.context.db.query(
       data_album_type
         ? `SELECT * FROM album WHERE data_album_type = '${data_album_type}'`
@@ -445,37 +444,19 @@ class BaseAPI {
   }
 
   async addBatchDynamicData(args) {
-    // const album_definition = await this.createDataAlbum({
-    //   data_album_type: args.album_id,
-    // });
-
-    // console.log(album_definition);
-
     if (args.album_id) {
-      let masters = [];
-      let uniques = [];
       await Promise.all(
         args.input.map(async (data) => {
-          this.insertNewDynamicData({
+          let datares = await this.insertNewDynamicData({
             album_id: args.album_id,
             master: data.master_field,
             field_value: data.field_value,
           });
-          if (uniques.indexOf(data.master_field) < 0) {
-            
-            masters.push({
-              master_field: data.master_field,
-              // batch_values: await this.getBatchSet({
-              //   album_id: args.album_id,
-              //   master: data.master_field,
-              // }),
-            });
-
-            uniques.push(data.master_field);
-          }
         })
       );
-      s;
+
+      let masters = await this.getMasters({ album_id: args.album_id });
+
       return {
         code: 201,
         success: true,
@@ -510,8 +491,6 @@ class BaseAPI {
         delta_date: new Date().toString(),
         field_subject_id: field_definition[0].field_id,
       });
-
-      // console.log(insert_result);
     });
   }
 
@@ -537,7 +516,6 @@ class BaseAPI {
         }
       })
     );
-    console.log(masters);
     return masters;
   }
 
@@ -550,7 +528,6 @@ class BaseAPI {
     let uniques = [];
     await Promise.all(
       referenced_data.map((data) => {
-        console.log({ data });
         if (uniques.indexOf(data.batch_id) < 0) {
           uniques.push(data.batch_id);
           batch_id.push({ batch_id: data.batch_id });
@@ -568,6 +545,23 @@ class BaseAPI {
     );
 
     return referenced_data;
+  }
+
+  async getDynamicDataByAlbum({ album_id }) {
+    let masters = await this.getMasters({ album_id });
+
+    return {
+      code: 201,
+      success: true,
+      message: masters ? "Data available" : "Failed or null database read",
+      result: [
+        {
+          album_id: album_id,
+          dynamic_data: true,
+          masters,
+        },
+      ],
+    };
   }
 }
 

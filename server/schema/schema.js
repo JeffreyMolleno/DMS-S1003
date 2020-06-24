@@ -71,6 +71,7 @@ const typeDefs = gql`
       showChild: Boolean
     ): GeneralResponse
     getFieldOfName(fieldName: String): GeneralResponse
+    getDynamicDataByAlbum(album_id: String): GeneralResponse
   }
 
   type Mutation {
