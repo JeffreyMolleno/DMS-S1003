@@ -210,7 +210,11 @@ class BaseAPI {
     };
   }
 
-  async getReferencedFieldsOfAlbumType({ data_album_type, master, showChild }) {
+  async getReferencedFieldsOfAlbumType({
+    data_album_type = "",
+    master,
+    showChild,
+  }) {
     let result = [];
 
     if (master && showChild) {
@@ -229,10 +233,16 @@ class BaseAPI {
       result: result,
     };
   }
-
   async getdbChilds({ data_album_type, master }) {
+
+    if (data_album_type) {
+      return await this.context.db.query(
+        `SELECt * FROM fields INNER JOIN album ON fields.album_id = album.data_album_id WHERE data_album_type = '${data_album_type}'  AND master_subject = '${master}'`
+      );
+    }
+
     return await this.context.db.query(
-      `SELECt * FROM fields INNER JOIN album ON fields.album_id = album.data_album_id WHERE data_album_type = '${data_album_type}'  AND master_subject = '${master}'`
+      `SELECt * FROM fields INNER JOIN album ON fields.album_id = album.data_album_id WHERE master_subject = '${master}'`
     );
   }
 

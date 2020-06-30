@@ -66,7 +66,7 @@ const typeDefs = gql`
     getAlbums(data_album_type: String): GeneralResponse
     getReferenceDataOfAlbum(albumId: ID): GeneralResponse
     getReferencedFieldsOfAlbumType(
-      data_album_type: String!
+      data_album_type: String
       master: String
       showChild: Boolean
     ): GeneralResponse

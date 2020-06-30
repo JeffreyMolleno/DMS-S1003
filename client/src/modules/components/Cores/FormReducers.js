@@ -42,14 +42,18 @@ export default function FormReducers({ fields, styleFunc, fields_of_type }) {
 
     if (is_dynamic) {
       positional_array.item_to_add_for_dynamic({
-        item_to_add: "DYNAMIC_FIELD_ADD",
+        item_to_add: `${name}_DYNAMIC_FIELD_ADD`,
         parent: name.split(" ").join("_"),
       });
 
       arrayCheck({
         position: "full_width",
         family: null,
-        fieldName: "DYNAMIC_FIELD_ADD",
+        fieldName: `${name}_DYNAMIC_FIELD_ADD`,
+      });
+
+      positional_array.set_parent_as_dynamic({
+        parent: name.split(" ").join("_"),
       });
     }
 
@@ -61,16 +65,13 @@ export default function FormReducers({ fields, styleFunc, fields_of_type }) {
         (orderOfAppearance.after.split(" ").join("_") ?? null),
     });
 
-    let rework = positional_array.reworkArray({
+    return positional_array.reworkArray({
       array: positional_array.arrangePairs({
         pairs: positional_array.getArrayPairs(),
       }),
       additionals: positional_array.getAdditionals(),
       parents: positional_array.getParentCollection(),
     });
-
-    console.log({ rework });
-    return rework;
   };
 
   const arrayCheck = ({ position, family, fieldName }) => {
@@ -84,8 +85,6 @@ export default function FormReducers({ fields, styleFunc, fields_of_type }) {
           fieldName,
         }),
       };
-
-      console.log({ gridTemplateAreaDefinition });
     }
   };
 
@@ -167,6 +166,11 @@ export default function FormReducers({ fields, styleFunc, fields_of_type }) {
         );
       }
     });
+
+    positional_array.setGridTemplateDefinition({
+      template_definition: finalGridAreaTemplate,
+    });
+
     return finalGridAreaTemplate;
   };
 
@@ -190,6 +194,13 @@ export default function FormReducers({ fields, styleFunc, fields_of_type }) {
     return { ...data.base };
   };
 
+  const insertOnGrid = ({ element_definition }) => {
+    // console.log(
+    //   positional_array.getGridTemplateDefinition(),
+    //   element_definition
+    // );
+  };
+
   const width_determinant = (position) => {
     if (position === "left" || position === "middle" || position === "right") {
       return "90%";
@@ -204,6 +215,10 @@ export default function FormReducers({ fields, styleFunc, fields_of_type }) {
     if (position === "left_half" || position === "right_half") {
       return "93%";
     }
+  };
+
+  const check_if_dynamic = ({ parent }) => {
+    return positional_array.check_if_dynamic({ parent });
   };
 
   const fieldOrganizer = ({ fields }) => {
@@ -231,13 +246,14 @@ export default function FormReducers({ fields, styleFunc, fields_of_type }) {
                   grid: { position: "full_width" },
                   base: {},
                 },
-                fieldSubject: "DYNAMIC_FIELD_ADD",
+                fieldSubject: `${data.main_subject}_DYNAMIC_FIELD_ADD`,
               }),
             }}
           >
             <DynamicFields
               parent_field={data.main_subject}
               fields_of_type={fields_of_type}
+              insertOnGrid={insertOnGrid}
             />
           </div>
         );
@@ -261,6 +277,8 @@ export default function FormReducers({ fields, styleFunc, fields_of_type }) {
                 field_subject={data.main_subject}
                 input_type={"text"}
                 considerations={considerations}
+                check_if_dynamic={check_if_dynamic}
+                parent={data.master_subject}
               />
             </div>
           );
@@ -282,6 +300,8 @@ export default function FormReducers({ fields, styleFunc, fields_of_type }) {
                 field_subject={data.main_subject}
                 input_type={"number"}
                 considerations={considerations}
+                check_if_dynamic={check_if_dynamic}
+                parent={data.master_subject}
               />
             </div>
           );
@@ -303,6 +323,8 @@ export default function FormReducers({ fields, styleFunc, fields_of_type }) {
                 field_subject={data.main_subject}
                 input_type={"password"}
                 considerations={considerations}
+                check_if_dynamic={check_if_dynamic}
+                parent={data.master_subject}
               />
             </div>
           );
@@ -404,6 +426,8 @@ export default function FormReducers({ fields, styleFunc, fields_of_type }) {
                 field_subject={data.main_subject}
                 input_type={"date_picker"}
                 considerations={considerations}
+                check_if_dynamic={check_if_dynamic}
+                parent={data.master_subject}
               />
             </div>
           );
@@ -412,6 +436,7 @@ export default function FormReducers({ fields, styleFunc, fields_of_type }) {
           return null;
       }
     });
+
     if (gridAreaName.length) {
       styleFunc(
         styleNormalizer({
@@ -420,6 +445,7 @@ export default function FormReducers({ fields, styleFunc, fields_of_type }) {
         })
       );
     }
+
     return StructuredFields;
   };
 

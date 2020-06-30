@@ -5,6 +5,7 @@ export default class ArrayArrange {
     this.dynamic_parent = [];
     this.parent_collection = [];
     this.additional_item_for_dynamic = [];
+    this.template_definition = "";
   }
 
   addArrayPair({ child, parent }) {
@@ -84,8 +85,6 @@ export default class ArrayArrange {
   }
 
   reworkArray({ array, additionals, parents }) {
-    console.log({ array, additionals, parents });
-
     // remove current reference additionals
     additionals.map((additional) => {
       while (array.indexOf(additional.item_to_add) > -1) {
@@ -113,5 +112,31 @@ export default class ArrayArrange {
 
   get_number_of_parent({ array, reference }) {
     return array.filter((data) => data === reference).length;
+  }
+
+  set_parent_as_dynamic({ parent }) {
+    if (this.dynamic_parent.indexOf(parent) < 0) {
+      this.dynamic_parent.push(parent);
+    }
+    return true;
+  }
+
+  getDynamicParents() {
+    return this.dynamic_parent;
+  }
+
+  check_if_dynamic({ parent }) {
+    if (this.dynamic_parent.indexOf(parent) > -1) {
+      return true;
+    }
+    return false;
+  }
+
+  setGridTemplateDefinition({ template_definition }) {
+    this.template_definition = template_definition;
+  }
+
+  getGridTemplateDefinition() {
+    return this.template_definition;
   }
 }

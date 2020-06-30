@@ -5,6 +5,7 @@ import {
   setFieldAlbumProperty,
   setFieldValue,
   deleteFieldValue,
+  setDynamicFieldValue,
 } from "../../Redux/Reducers/Slice/FieldsSlice";
 import {
   getReferencedDataOfAlbumType,
@@ -32,12 +33,15 @@ export function InputFields({
   considerations = null,
   label_subject,
   FieldsState,
+  check_if_dynamic,
+  parent,
 }) {
   const [consolidateBatchData] = useMutation(addBatchData);
   const [validateDataCorelation] = useMutation(validateData);
-  const [selectedDate, setSelectedDate] = React.useState(
+  const [selectedDate, setSelectedDate] = React
+    .useState
     // new Date("2020-06-18T21:11:54")
-  );
+    ();
 
   const dispatch = useDispatch();
   let history = useHistory();
@@ -121,11 +125,28 @@ export function InputFields({
   };
 
   const preFormDataGet = ({ field_subject }) => {
-    return FieldsState.input[field_subject] && FieldsState.input[field_subject];
+    if (!check_if_dynamic({ parent })) {
+      return (
+        FieldsState.input[field_subject] && FieldsState.input[field_subject]
+      );
+    } else {
+      let parent_collection = FieldsState.new_dynamic_data.filter(
+        (data) => data.parent === parent
+      );
+
+      return parent_collection.length > 0
+        ? parent_collection[0].field_values[field_subject] ?? ""
+        : "";
+    }
   };
 
   const processInput = ({ value, attribute }) => {
-    dispatch(setFieldValue({ [attribute]: value }));
+    if (check_if_dynamic({ parent })) {
+      return dispatch(
+        setDynamicFieldValue({ parent, field_values: { [attribute]: value } })
+      );
+    }
+    return dispatch(setFieldValue({ [attribute]: value }));
   };
 
   const handleDateChange = (date, attribute) => {
@@ -230,6 +251,11 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatch = { setFieldAlbumProperty, setFieldValue, deleteFieldValue };
+const mapDispatch = {
+  setFieldAlbumProperty,
+  setFieldValue,
+  deleteFieldValue,
+  setDynamicFieldValue,
+};
 
 export default connect(mapStateToProps, mapDispatch)(InputFields);
