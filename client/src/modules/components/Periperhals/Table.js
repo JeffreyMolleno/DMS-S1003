@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import DataTable, { createTheme } from "react-data-table-component";
-import { dispatch, connect } from "react-redux";
+import { useDispatch, connect } from "react-redux";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 import {
   getReferencedFieldsOfAlbumType,
@@ -8,9 +8,15 @@ import {
 } from "../../Server/FieldsQueries";
 import TableDataNormalizer from "../Cores/TableDataNormalizer";
 import Button from "@material-ui/core/Button";
+import {
+  deleteHoldFieldValue,
+  editHoldFieldValue,
+} from "../../Redux/Reducers/Slice/FieldsSlice";
 
 export function Table({ FieldState, Parent }) {
   const [state, setstate] = useState({ columns: [], data: [] });
+
+  const dispatch = useDispatch();
 
   const { loading, error, data } = useQuery(getReferencedFieldsOfAlbumType, {
     variables: { type_subject: "", master: "References", showChild: true },
@@ -81,8 +87,14 @@ export function Table({ FieldState, Parent }) {
     },
   ];
 
-  const handleClick = (data) => {
-    console.log(data);
+  const handleEdit = (data) => {
+    console.log("Edit", { data });
+    dispatch(editHoldFieldValue({ parent: Parent, field_values: data }));
+  };
+
+  const handleDelete = (data) => {
+    console.log({ parent: Parent, field_values: data });
+    dispatch(deleteHoldFieldValue({ parent: Parent, field_values: data }));
   };
 
   return (
@@ -92,13 +104,28 @@ export function Table({ FieldState, Parent }) {
         ...state.columns,
         {
           cell: (row) => (
-            <Button raised primary onClick={() => handleClick(row)}>
-              Action
+            <Button raised primary onClick={() => handleEdit(row)}>
+              Edit
             </Button>
           ),
           ignoreRowClick: true,
           allowOverflow: true,
           button: true,
+        },
+        {
+          cell: (row) => (
+            <Button raised primary onClick={() => handleDelete(row)}>
+              Delete
+            </Button>
+          ),
+          ignoreRowClick: true,
+          allowOverflow: true,
+          button: true,
+        },
+        {
+          name: "ID",
+          selector: "id",
+          hide: "lg",
         },
       ]}
       data={state.data}
@@ -111,6 +138,6 @@ const mapStateToProps = (state) => {
   return { FieldState: state.Fields };
 };
 
-const mapDispatch = {};
+const mapDispatch = { deleteHoldFieldValue, editHoldFieldValue };
 
 export default connect(mapStateToProps, mapDispatch)(Table);

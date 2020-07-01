@@ -1,5 +1,16 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+const generator = (length) => {
+  var chars = "0123456789";
+  var randomstring = "";
+  for (var i = 0; i < length; i++) {
+    var rnum = Math.floor(Math.random() * chars.length);
+    randomstring += chars.substring(rnum, rnum + 1);
+  }
+
+  return randomstring;
+};
+
 const FieldsSlice = createSlice({
   name: "Fields",
 
@@ -54,8 +65,6 @@ const FieldsSlice = createSlice({
         (data) => data.parent === action.payload.parent
       );
 
-      console.log(action.payload, index_ref);
-
       if (index_ref > -1) {
         let dyna = Object.assign([], state.new_dynamic_data);
         dyna[index_ref] = {
@@ -90,12 +99,68 @@ const FieldsSlice = createSlice({
       if (index < 0) return { ...state };
 
       let hold_dynamic_data = Object.assign([], state.hold_dynamic_data);
-      hold_dynamic_data.push(state.new_dynamic_data[index]);
-      let new_dynamic_data = Object.assign([], state.new_dynamic_data).splice(
-        index,
-        0
+
+      hold_dynamic_data.push({
+        ...state.new_dynamic_data[index],
+        id: generator(6),
+      });
+
+      let new_dynamic_data = Object.assign([], state.new_dynamic_data);
+
+      let left = new_dynamic_data.slice(0, index);
+      let right = new_dynamic_data.slice(index + 1, new_dynamic_data.length);
+
+      return {
+        ...state,
+        new_dynamic_data: left.concat(right),
+        hold_dynamic_data,
+        reset: false,
+      };
+    },
+    deleteHoldFieldValue(state, action) {
+      console.log("Delete", action.payload);
+      let delete_index = state.hold_dynamic_data.findIndex(
+        (data) =>
+          data.parent === action.payload.parent &&
+          data.id === action.payload.field_values.id
       );
-      return { ...state, new_dynamic_data, hold_dynamic_data, reset: false };
+
+      let hold_dynamic_data = Object.assign([], state.hold_dynamic_data);
+
+      let left = hold_dynamic_data.slice(0, delete_index);
+      let right = hold_dynamic_data.slice(
+        delete_index + 1,
+        hold_dynamic_data.length
+      );
+
+      return { ...state, hold_dynamic_data: left.concat(right), reset: false };
+    },
+    editHoldFieldValue(state, action) {
+      console.log("Edit", action.payload);
+
+      let edit_index = state.hold_dynamic_data.findIndex(
+        (data) =>
+          data.parent === action.payload.parent &&
+          data.id === action.payload.field_values.id
+      );
+
+      let hold_dynamic_data = Object.assign([], state.hold_dynamic_data);
+
+      let left = hold_dynamic_data.slice(0, edit_index);
+      let right = hold_dynamic_data.slice(
+        edit_index + 1,
+        hold_dynamic_data.length
+      );
+
+      let new_dynamic_data = Object.assign([], state.new_dynamic_data);
+
+      new_dynamic_data.push(hold_dynamic_data[edit_index]);
+
+      return {
+        ...state,
+        new_dynamic_data,
+        hold_dynamic_data: left.concat(right),
+      };
     },
   },
 });
@@ -107,6 +172,8 @@ export const {
   deleteAllFieldValue,
   setDynamicFieldValue,
   setDynamicFieldValueToHold,
+  deleteHoldFieldValue,
+  editHoldFieldValue,
 } = FieldsSlice.actions;
 
 export default FieldsSlice.reducer;

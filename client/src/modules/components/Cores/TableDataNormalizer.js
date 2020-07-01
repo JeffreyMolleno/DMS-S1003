@@ -17,7 +17,7 @@ export default class TableDataNormalizer {
     if (this.table_data.length !== []) {
       this.table_data.length > 0 &&
         this.table_data.map((data) => {
-          this.normalize_table_data.push(data.field_values);
+          this.normalize_table_data.push({ ...data.field_values, id: data.id });
         });
 
       return this.normalize_table_data;
