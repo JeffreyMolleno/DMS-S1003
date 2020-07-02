@@ -15,7 +15,7 @@ const FieldsSlice = createSlice({
   name: "Fields",
 
   initialState: {
-    input: [],
+    input: {},
     reset: false,
     new_dynamic_data: [],
     hold_dynamic_data: [],

@@ -34,7 +34,7 @@ export default class TableDataNormalizer {
               name: fdata.main_subject
                 .replace(/[{()},%]/g, "")
                 .split(" ")
-                .join("_"),
+                .join(" "),
               selector: fdata.main_subject,
               sortable: true,
             })

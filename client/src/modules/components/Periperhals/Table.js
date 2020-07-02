@@ -123,7 +123,7 @@ export function Table({ FieldState, Parent }) {
           button: true,
         },
         {
-          name: "ID",
+          width: "0px",
           selector: "id",
           hide: "lg",
         },
