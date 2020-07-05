@@ -234,7 +234,6 @@ class BaseAPI {
     };
   }
   async getdbChilds({ data_album_type, master }) {
-
     if (data_album_type) {
       return await this.context.db.query(
         `SELECt * FROM fields INNER JOIN album ON fields.album_id = album.data_album_id WHERE data_album_type = '${data_album_type}'  AND master_subject = '${master}'`
@@ -454,18 +453,30 @@ class BaseAPI {
   }
 
   async addBatchDynamicData(args) {
-    if (args.album_id) {
+    let album_id = null;
+    if (!args.album_id) {
+      let album_definition = await this.createDataAlbum({
+        data_album_type: args.album_type,
+        create_new: true,
+      });
+
+      album_id = album_definition.result[0].data_album_id;
+    }
+
+    if (album_id || args.album_id) {
       await Promise.all(
         args.input.map(async (data) => {
           let datares = await this.insertNewDynamicData({
-            album_id: args.album_id,
+            album_id: args.album_id ? args.album_id : album_id,
             master: data.master_field,
             field_value: data.field_value,
           });
         })
       );
 
-      let masters = await this.getMasters({ album_id: args.album_id });
+      let masters = await this.getMasters({
+        album_id: args.album_id ? args.album_id : album_id,
+      });
 
       return {
         code: 201,
@@ -473,7 +484,7 @@ class BaseAPI {
         message: "Data Consolidation succesful",
         result: [
           {
-            album_id: args.album_id,
+            album_id: args.album_id ? args.album_id : album_id,
             dynamic_data: true,
             masters,
           },

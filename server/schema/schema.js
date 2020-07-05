@@ -95,6 +95,7 @@ const typeDefs = gql`
       input: FieldInput!
     ): GeneralResponse
     addBatchDynamicData(
+      album_type: String
       album_id: String
       input: [DynamicDataInput]
     ): GeneralResponse
