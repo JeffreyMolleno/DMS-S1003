@@ -85,6 +85,7 @@ export default class ArrayArrange {
   }
 
   reworkArray({ array, additionals, parents }) {
+    console.log({ array, additionals, parents });
     // remove current reference additionals
     additionals.map((additional) => {
       while (array.indexOf(additional.item_to_add) > -1) {

@@ -3,11 +3,11 @@ import { useDispatch, connect } from "react-redux";
 import { setDynamicFieldValueToHold } from "../../Redux/Reducers/Slice/FieldsSlice";
 import Table from "./Table";
 
-export function DynamicFields({ parent_field, fields_of_type, insertOnGrid }) {
+export function DynamicFields({ parent_field, fields_of_type }) {
   const dispatch = useDispatch();
 
   const dynamicDataStore = ({ parent_field, fields_of_type }) => {
-    insertOnGrid({ element_definition: parent_field });
+    console.log(parent_field);
     dispatch(setDynamicFieldValueToHold({ parent_field }));
   };
 

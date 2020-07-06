@@ -37,19 +37,23 @@ export default function FormReducers({ fields, styleFunc, fields_of_type }) {
     parent = null,
   }) => {
     if (parent) {
-      positional_array.add_parent_to_collection({ parent });
+      positional_array.add_parent_to_collection({
+        parent: parent.split(" ").join("_"),
+      });
     }
 
     if (is_dynamic) {
       positional_array.item_to_add_for_dynamic({
-        item_to_add: `${name}_DYNAMIC_FIELD_ADD`,
+        item_to_add: `${name.split(" ").join("_")}_DYNAMIC_FIELD_ADD`,
         parent: name.split(" ").join("_"),
       });
+
+      console.log("Adding on Grid: ", `${name}_DYNAMIC_FIELD_ADD`);
 
       arrayCheck({
         position: "full_width",
         family: null,
-        fieldName: `${name}_DYNAMIC_FIELD_ADD`,
+        fieldName: `${name.split(" ").join("_")}_DYNAMIC_FIELD_ADD`,
       });
 
       positional_array.set_parent_as_dynamic({
@@ -194,13 +198,6 @@ export default function FormReducers({ fields, styleFunc, fields_of_type }) {
     return { ...data.base };
   };
 
-  const insertOnGrid = ({ element_definition }) => {
-    // console.log(
-    //   positional_array.getGridTemplateDefinition(),
-    //   element_definition
-    // );
-  };
-
   const width_determinant = (position) => {
     if (position === "left" || position === "middle" || position === "right") {
       return "90%";
@@ -253,7 +250,6 @@ export default function FormReducers({ fields, styleFunc, fields_of_type }) {
             <DynamicFields
               parent_field={data.main_subject}
               fields_of_type={fields_of_type}
-              insertOnGrid={insertOnGrid}
             />
           </div>
         );
@@ -425,6 +421,30 @@ export default function FormReducers({ fields, styleFunc, fields_of_type }) {
                 field_id={data.field_id}
                 field_subject={data.main_subject}
                 input_type={"date_picker"}
+                considerations={considerations}
+                check_if_dynamic={check_if_dynamic}
+                parent={data.master_subject}
+              />
+            </div>
+          );
+          break;
+        case "INPUT_FIELD_SELECT":
+          console.log("select menu");
+          StructuredFields.push(
+            <div
+              key={data.field_id}
+              style={{
+                ...styleBase({
+                  data: considerations.Styling,
+                  fieldSubject: data.main_subject,
+                }),
+              }}
+            >
+              <InputFields
+                label_subject={data.main_subject}
+                field_id={data.field_id}
+                field_subject={data.main_subject}
+                input_type={"select_menu"}
                 considerations={considerations}
                 check_if_dynamic={check_if_dynamic}
                 parent={data.master_subject}

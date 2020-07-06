@@ -17,7 +17,6 @@ const resolvers = {
       const result = await context.dataSources.Base.getTypeSubject({
         type_id: parent.field_type,
       });
-
       return result[0].type_subject;
     },
   },
@@ -75,7 +74,9 @@ const resolvers = {
       return await context.dataSources.Base.getFieldOfName(args.fieldName);
     },
     async getDynamicDataByAlbum(parent, args, context, info) {
-      return await context.dataSources.Base.getDynamicDataByAlbum({album_id: args.album_id});
+      return await context.dataSources.Base.getDynamicDataByAlbum({
+        album_id: args.album_id,
+      });
     },
   },
   Mutation: {

@@ -24,6 +24,7 @@ import {
   KeyboardTimePicker,
   KeyboardDatePicker,
 } from "@material-ui/pickers";
+import InputSelect from "../Periperhals/InputSelect";
 
 export function InputFields({
   field_id,
@@ -117,7 +118,7 @@ export function InputFields({
         alert(post.fail.prompt);
         return null;
       case 404: // data not registered
-        alert(post.fail.prompt);
+        alert(post.fail.promp);
         return null;
       default:
         break;
@@ -125,7 +126,7 @@ export function InputFields({
   };
 
   const preFormDataGet = ({ field_subject }) => {
-    if (!check_if_dynamic({ parent })) {
+    if (!check_if_dynamic({ parent: parent.split(" ").join("_") })) {
       return (
         FieldsState.input[field_subject] && FieldsState.input[field_subject]
       );
@@ -141,7 +142,7 @@ export function InputFields({
   };
 
   const processInput = ({ value, attribute }) => {
-    if (check_if_dynamic({ parent })) {
+    if (check_if_dynamic({ parent: parent.split(" ").join("_") })) {
       return dispatch(
         setDynamicFieldValue({ parent, field_values: { [attribute]: value } })
       );
@@ -228,6 +229,16 @@ export function InputFields({
             }}
           />
         </MuiPickersUtilsProvider>
+      )}
+
+      {input_type === "select_menu" && (
+        <InputSelect
+          FieldName={label_subject.replace(/\%([^)]+)\%/g, "")}
+          isRequired={false}
+          inputChange={(data) => {
+            processInput({ value: data, attribute: field_subject });
+          }}
+        />
       )}
 
       <br />

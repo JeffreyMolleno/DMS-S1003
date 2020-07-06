@@ -19,7 +19,7 @@ export function Table({ FieldState, Parent }) {
   const dispatch = useDispatch();
 
   const { loading, error, data } = useQuery(getReferencedFieldsOfAlbumType, {
-    variables: { type_subject: "", master: "References", showChild: true },
+    variables: { type_subject: "", master: Parent, showChild: true },
   });
 
   const tabledata = new TableDataNormalizer();
@@ -32,9 +32,12 @@ export function Table({ FieldState, Parent }) {
           (data) => data.parent != undefined && data.parent === Parent
         );
       tabledata.setTableData({ data: data_to_proc });
+
       tabledata.structureColumns({
         datafields: !loading && data.getReferencedFieldsOfAlbumType.result,
       });
+
+      console.log(tabledata.getColumns());
       setstate((prevState) => {
         return {
           ...prevState,
@@ -48,13 +51,14 @@ export function Table({ FieldState, Parent }) {
   const customStyles = {
     rows: {
       style: {
-        minHeight: "72px", // override the row height
+        // minHeight: "72px", // override the row height
       },
     },
     headCells: {
       style: {
-        paddingLeft: "8px", // override the cell padding for head cells
-        paddingRight: "8px",
+        height: "0px",
+        // paddingLeft: "8px", // override the cell padding for head cells
+        // paddingRight: "8px",
       },
     },
     cells: {
@@ -88,49 +92,49 @@ export function Table({ FieldState, Parent }) {
   ];
 
   const handleEdit = (data) => {
-    console.log("Edit", { data });
     dispatch(editHoldFieldValue({ parent: Parent, field_values: data }));
   };
 
   const handleDelete = (data) => {
-    console.log({ parent: Parent, field_values: data });
     dispatch(deleteHoldFieldValue({ parent: Parent, field_values: data }));
   };
 
   return (
-    <DataTable
-      title={Parent}
-      columns={[
-        ...state.columns,
-        {
-          cell: (row) => (
-            <Button raised primary onClick={() => handleEdit(row)}>
-              Edit
-            </Button>
-          ),
-          ignoreRowClick: true,
-          allowOverflow: true,
-          button: true,
-        },
-        {
-          cell: (row) => (
-            <Button raised primary onClick={() => handleDelete(row)}>
-              Delete
-            </Button>
-          ),
-          ignoreRowClick: true,
-          allowOverflow: true,
-          button: true,
-        },
-        {
-          width: "0px",
-          selector: "id",
-          hide: "lg",
-        },
-      ]}
-      data={state.data}
-      customStyles={customStyles}
-    />
+    <div style={{ display: state.data.length > 0 ? "block" : "none" }}>
+      <DataTable
+        // title={Parent}
+        columns={[
+          ...state.columns,
+          {
+            cell: (row) => (
+              <Button raised primary onClick={() => handleEdit(row)}>
+                Edit
+              </Button>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+          },
+          {
+            cell: (row) => (
+              <Button raised primary onClick={() => handleDelete(row)}>
+                Delete
+              </Button>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+          },
+          {
+            width: "0px",
+            selector: "id",
+            hide: "lg",
+          },
+        ]}
+        data={state.data}
+        customStyles={customStyles}
+      />
+    </div>
   );
 }
 

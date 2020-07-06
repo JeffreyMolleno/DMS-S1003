@@ -118,7 +118,6 @@ const FieldsSlice = createSlice({
       };
     },
     deleteHoldFieldValue(state, action) {
-      console.log("Delete", action.payload);
       let delete_index = state.hold_dynamic_data.findIndex(
         (data) =>
           data.parent === action.payload.parent &&
@@ -154,7 +153,7 @@ const FieldsSlice = createSlice({
 
       let new_dynamic_data = Object.assign([], state.new_dynamic_data);
 
-      new_dynamic_data.push(hold_dynamic_data[edit_index]);
+      new_dynamic_data = [hold_dynamic_data[edit_index]];
 
       return {
         ...state,
