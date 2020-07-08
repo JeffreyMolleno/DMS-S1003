@@ -238,6 +238,11 @@ export function InputFields({
           inputChange={(data) => {
             processInput({ value: data, attribute: field_subject });
           }}
+          value={
+            FieldsState.reset
+              ? ""
+              : preFormDataGet({ field_subject: label_subject })
+          }
         />
       )}
 

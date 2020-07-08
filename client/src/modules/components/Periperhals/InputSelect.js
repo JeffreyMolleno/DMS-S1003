@@ -12,6 +12,7 @@ export default function InputSelect({
   isRequired = false,
   HelperText = "",
   inputChange,
+  value = "None",
 }) {
   const { loading, error, data = [] } = useQuery(
     getReferencedFieldsOfAlbumType,
@@ -21,7 +22,7 @@ export default function InputSelect({
   );
 
   const classes = useStyles();
-  const [selected, setSelected] = React.useState("");
+  const [selected, setSelected] = React.useState(value);
   const [menu, setMenu] = React.useState([]);
 
   useEffect(() => {
@@ -30,9 +31,11 @@ export default function InputSelect({
       data.getReferencedFieldsOfAlbumType.result.map((item) => {
         return menu_item.push(item.main_subject);
       });
-    console.log({ menu_item });
     setMenu(menu_item);
-  }, [data]);
+
+    // console.log(value);
+    setSelected(value);
+  }, [data, value]);
 
   const handleChange = (event) => {
     setSelected(event.target.value);

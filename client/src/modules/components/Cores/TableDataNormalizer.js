@@ -29,7 +29,7 @@ export default class TableDataNormalizer {
       datafields.map((fdata) => {
         return this.table_columns.findIndex(
           (data) => data.name === fdata.main_subject
-        ) < 0
+        ) < 0 && fdata.field_type !== "INPUT_FIELD_SELECT_MENU"
           ? this.table_columns.push({
               name: fdata.main_subject
                 .replace(/[{()},%]/g, "")
