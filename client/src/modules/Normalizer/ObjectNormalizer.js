@@ -11,3 +11,15 @@ export function ConvertToDataFields(data) {
 
   return converted;
 }
+
+export function NormalizeParentFieldValueFormat(dynamic_fields_and_values) {
+  let processed_data = [];
+
+  dynamic_fields_and_values.map((data) => {
+    processed_data.push({
+      master_field: data.parent,
+      field_value: ConvertToDataFields(data.field_values),
+    });
+  });
+  return processed_data;
+}

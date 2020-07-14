@@ -37,6 +37,36 @@ export const addBatchData = gql`
           data_id
           field_subject
           value
+          data_album_id
+        }
+      }
+    }
+  }
+`;
+
+export const ConsolidateBatchDynamicData = gql`
+  mutation($album_type: String, $album_id: String, $input: [DynamicDataInput]) {
+    addBatchDynamicData(
+      album_type: $album_type
+      album_id: $album_id
+      input: $input
+    ) {
+      code
+      message
+      result {
+        ... on DynamicData {
+          album_id
+          masters {
+            master_field
+            batch_values {
+              batch_id
+              fields_values_set {
+                dynad_id
+                holding_value
+                field_subject
+              }
+            }
+          }
         }
       }
     }

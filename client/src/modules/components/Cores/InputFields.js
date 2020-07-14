@@ -5,6 +5,7 @@ import {
   setFieldAlbumProperty,
   setFieldValue,
   deleteFieldValue,
+  setDynamicFieldValue,
 } from "../../Redux/Reducers/Slice/FieldsSlice";
 import {
   getReferencedDataOfAlbumType,
@@ -23,6 +24,7 @@ import {
   KeyboardTimePicker,
   KeyboardDatePicker,
 } from "@material-ui/pickers";
+import InputSelect from "../Periperhals/InputSelect";
 
 export function InputFields({
   field_id,
@@ -32,12 +34,15 @@ export function InputFields({
   considerations = null,
   label_subject,
   FieldsState,
+  check_if_dynamic,
+  parent,
 }) {
   const [consolidateBatchData] = useMutation(addBatchData);
   const [validateDataCorelation] = useMutation(validateData);
-  const [selectedDate, setSelectedDate] = React.useState(
+  const [selectedDate, setSelectedDate] = React
+    .useState
     // new Date("2020-06-18T21:11:54")
-  );
+    ();
 
   const dispatch = useDispatch();
   let history = useHistory();
@@ -113,7 +118,7 @@ export function InputFields({
         alert(post.fail.prompt);
         return null;
       case 404: // data not registered
-        alert(post.fail.prompt);
+        alert(post.fail.promp);
         return null;
       default:
         break;
@@ -121,11 +126,28 @@ export function InputFields({
   };
 
   const preFormDataGet = ({ field_subject }) => {
-    return FieldsState.input[field_subject] && FieldsState.input[field_subject];
+    if (!check_if_dynamic({ parent: parent.split(" ").join("_") })) {
+      return (
+        FieldsState.input[field_subject] && FieldsState.input[field_subject]
+      );
+    } else {
+      let parent_collection = FieldsState.new_dynamic_data.filter(
+        (data) => data.parent === parent
+      );
+
+      return parent_collection.length > 0
+        ? parent_collection[0].field_values[field_subject] ?? ""
+        : "";
+    }
   };
 
   const processInput = ({ value, attribute }) => {
-    dispatch(setFieldValue({ [attribute]: value }));
+    if (check_if_dynamic({ parent: parent.split(" ").join("_") })) {
+      return dispatch(
+        setDynamicFieldValue({ parent, field_values: { [attribute]: value } })
+      );
+    }
+    return dispatch(setFieldValue({ [attribute]: value }));
   };
 
   const handleDateChange = (date, attribute) => {
@@ -209,6 +231,21 @@ export function InputFields({
         </MuiPickersUtilsProvider>
       )}
 
+      {input_type === "select_menu" && (
+        <InputSelect
+          FieldName={label_subject.replace(/\%([^)]+)\%/g, "")}
+          isRequired={false}
+          inputChange={(data) => {
+            processInput({ value: data, attribute: field_subject });
+          }}
+          value={
+            FieldsState.reset
+              ? ""
+              : preFormDataGet({ field_subject: label_subject })
+          }
+        />
+      )}
+
       <br />
     </React.Fragment>
   );
@@ -230,6 +267,11 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatch = { setFieldAlbumProperty, setFieldValue, deleteFieldValue };
+const mapDispatch = {
+  setFieldAlbumProperty,
+  setFieldValue,
+  deleteFieldValue,
+  setDynamicFieldValue,
+};
 
 export default connect(mapStateToProps, mapDispatch)(InputFields);

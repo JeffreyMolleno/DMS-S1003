@@ -158,7 +158,6 @@ class BaseAPI {
   }
 
   async getAlbums({ data_album_type }) {
-    console.log("data_album_type: ", data_album_type);
     const result = await this.context.db.query(
       data_album_type
         ? `SELECT * FROM album WHERE data_album_type = '${data_album_type}'`
@@ -211,7 +210,11 @@ class BaseAPI {
     };
   }
 
-  async getReferencedFieldsOfAlbumType({ data_album_type, master, showChild }) {
+  async getReferencedFieldsOfAlbumType({
+    data_album_type = "",
+    master,
+    showChild,
+  }) {
     let result = [];
 
     if (master && showChild) {
@@ -230,10 +233,15 @@ class BaseAPI {
       result: result,
     };
   }
-
   async getdbChilds({ data_album_type, master }) {
+    if (data_album_type) {
+      return await this.context.db.query(
+        `SELECt * FROM fields INNER JOIN album ON fields.album_id = album.data_album_id WHERE data_album_type = '${data_album_type}'  AND master_subject = '${master}'`
+      );
+    }
+
     return await this.context.db.query(
-      `SELECt * FROM fields INNER JOIN album ON fields.album_id = album.data_album_id WHERE data_album_type = '${data_album_type}'  AND master_subject = '${master}'`
+      `SELECt * FROM fields INNER JOIN album ON fields.album_id = album.data_album_id WHERE master_subject = '${master}'`
     );
   }
 
@@ -442,6 +450,139 @@ class BaseAPI {
           message: `Data not available`,
           result: null,
         };
+  }
+
+  async addBatchDynamicData(args) {
+    let album_id = null;
+    if (!args.album_id) {
+      let album_definition = await this.createDataAlbum({
+        data_album_type: args.album_type,
+        create_new: true,
+      });
+
+      album_id = album_definition.result[0].data_album_id;
+    }
+
+    if (album_id || args.album_id) {
+      await Promise.all(
+        args.input.map(async (data) => {
+          let datares = await this.insertNewDynamicData({
+            album_id: args.album_id ? args.album_id : album_id,
+            master: data.master_field,
+            field_value: data.field_value,
+          });
+        })
+      );
+
+      let masters = await this.getMasters({
+        album_id: args.album_id ? args.album_id : album_id,
+      });
+
+      return {
+        code: 201,
+        success: true,
+        message: "Data Consolidation succesful",
+        result: [
+          {
+            album_id: args.album_id ? args.album_id : album_id,
+            dynamic_data: true,
+            masters,
+          },
+        ],
+      };
+    }
+  }
+
+  async insertNewDynamicData({ album_id, master, field_value }) {
+    const batch_id = await this.createDataAlbum({
+      data_album_type: master,
+      create_new: true,
+    });
+
+    field_value.map(async (field) => {
+      const field_definition = await this.getField({
+        subject: field.field_subject,
+      });
+
+      const insert_result = await this.context.db.dynamic_data.insert({
+        dynad_id: genKey("batch"),
+        album_id: album_id,
+        batch_id: batch_id.result[0].data_album_id,
+        holding_value: field.value,
+        delta_date: new Date().toString(),
+        field_subject_id: field_definition[0].field_id,
+      });
+    });
+  }
+
+  async getMasters({ album_id }) {
+    const referenced_data = await this.context.db.query(
+      `SELECT * FROM dynamic_data INNER JOIN album ON dynamic_data.batch_id = album.data_album_id WHERE dynamic_data.album_id = '${album_id}'`
+    );
+
+    let uniques = [];
+    let masters = [];
+    await Promise.all(
+      referenced_data.map(async (data) => {
+        if (uniques.indexOf(data.data_album_type) < 0) {
+          uniques.push(data.data_album_type);
+
+          masters.push({
+            master_field: data.data_album_type,
+            batch_values: await this.getBatchSet({
+              master: data.data_album_type,
+              album_id,
+            }),
+          });
+        }
+      })
+    );
+    return masters;
+  }
+
+  async getBatchSet({ master, album_id }) {
+    const referenced_data = await this.context.db.query(
+      `SELECT * FROM dynamic_data INNER JOIN album ON dynamic_data.batch_id = album.data_album_id WHERE dynamic_data.album_id = '${album_id}' AND album.data_album_type = '${master}'`
+    );
+
+    let batch_id = [];
+    let uniques = [];
+    await Promise.all(
+      referenced_data.map((data) => {
+        if (uniques.indexOf(data.batch_id) < 0) {
+          uniques.push(data.batch_id);
+          batch_id.push({ batch_id: data.batch_id });
+        }
+      })
+    );
+
+    return batch_id;
+  }
+
+  async getBatchFieldValues({ batch_id }) {
+    const referenced_data = await this.context.db.query(
+      `SELECT dynamic_data.dynad_id, fields.main_subject as field_subject, dynamic_data.holding_value FROM dynamic_data INNER JOIN album ON dynamic_data.batch_id = album.data_album_id INNER JOIN fields
+      ON dynamic_data.field_subject_id = fields.field_id WHERE dynamic_data.batch_id = '${batch_id}'`
+    );
+
+    return referenced_data;
+  }
+
+  async getDynamicDataByAlbum({ album_id }) {
+    let masters = await this.getMasters({ album_id });
+
+    return {
+      code: 201,
+      success: true,
+      message: masters ? "Data available" : "Failed or null database read",
+      result: [
+        {
+          album_id: album_id,
+          dynamic_data: true,
+          masters,
+        },
+      ],
+    };
   }
 }
 

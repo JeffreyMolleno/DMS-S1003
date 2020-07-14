@@ -2,8 +2,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import FormDialog from "../Periperhals/FormDialog";
 import InputFields from "../Cores/InputFields";
 import ArrayArrange from "../Cores/ArrayArrange";
-
-export default function FormReducers({ fields, styleFunc }) {
+import FormFields from "../Cores/FormFields";
+import DynamicFields from "../Periperhals/DynamicFields";
+export default function FormReducers({ fields, styleFunc, fields_of_type }) {
   let gridTemplateAreaDefinition = {};
   let gridAreaName = [];
 
@@ -14,6 +15,8 @@ export default function FormReducers({ fields, styleFunc }) {
         array: gridAreaName,
         orderOfAppearance:
           (styledata.grid && styledata.grid.order_of_appearance) ?? "none",
+        is_dynamic: data.is_dynamic,
+        parent: data.master_subject,
       });
 
       arrayCheck({
@@ -26,24 +29,57 @@ export default function FormReducers({ fields, styleFunc }) {
 
   let positional_array = new ArrayArrange();
 
-  const arrangeArrayToPosition = ({ name, array, orderOfAppearance }) => {
-    // console.log(name, array, orderOfAppearance);
+  const arrangeArrayToPosition = ({
+    name,
+    array,
+    orderOfAppearance,
+    is_dynamic = false,
+    parent = null,
+  }) => {
+    if (parent) {
+      positional_array.add_parent_to_collection({
+        parent: parent.split(" ").join("_"),
+      });
+    }
 
+    if (is_dynamic) {
+      positional_array.item_to_add_for_dynamic({
+        item_to_add: `${name.split(" ").join("_")}_DYNAMIC_FIELD_ADD`,
+        parent: name.split(" ").join("_"),
+      });
+
+      console.log("Adding on Grid: ", `${name}_DYNAMIC_FIELD_ADD`);
+
+      arrayCheck({
+        position: "full_width",
+        family: null,
+        fieldName: `${name.split(" ").join("_")}_DYNAMIC_FIELD_ADD`,
+      });
+
+      positional_array.set_parent_as_dynamic({
+        parent: name.split(" ").join("_"),
+      });
+    }
+
+    // console.log(name, array, orderOfAppearance);
     positional_array.addArrayPair({
       child: name.split(" ").join("_"),
       parent:
         orderOfAppearance.after &&
         (orderOfAppearance.after.split(" ").join("_") ?? null),
     });
-    console.log(positional_array.getArrayPairs());
-    return positional_array.arrangePairs({
-      pairs: positional_array.getArrayPairs(),
+
+    return positional_array.reworkArray({
+      array: positional_array.arrangePairs({
+        pairs: positional_array.getArrayPairs(),
+      }),
+      additionals: positional_array.getAdditionals(),
+      parents: positional_array.getParentCollection(),
     });
   };
 
   const arrayCheck = ({ position, family, fieldName }) => {
-    let definition = gridTemplateAreaDefinition[family] ?? "";
-
+    // let definition = gridTemplateAreaDefinition[family] ?? "";
     if (position) {
       gridTemplateAreaDefinition = {
         ...gridTemplateAreaDefinition,
@@ -134,7 +170,10 @@ export default function FormReducers({ fields, styleFunc }) {
         );
       }
     });
-    console.log(finalGridAreaTemplate);
+
+    positional_array.setGridTemplateDefinition({
+      template_definition: finalGridAreaTemplate,
+    });
 
     return finalGridAreaTemplate;
   };
@@ -175,6 +214,10 @@ export default function FormReducers({ fields, styleFunc }) {
     }
   };
 
+  const check_if_dynamic = ({ parent }) => {
+    return positional_array.check_if_dynamic({ parent });
+  };
+
   const fieldOrganizer = ({ fields }) => {
     let StructuredFields = [];
 
@@ -189,6 +232,27 @@ export default function FormReducers({ fields, styleFunc }) {
           data,
           forElement: "parent",
         });
+      }
+
+      if (data.is_dynamic) {
+        StructuredFields.push(
+          <div
+            style={{
+              ...styleBase({
+                data: {
+                  grid: { position: "full_width" },
+                  base: {},
+                },
+                fieldSubject: `${data.main_subject}_DYNAMIC_FIELD_ADD`,
+              }),
+            }}
+          >
+            <DynamicFields
+              parent_field={data.main_subject}
+              fields_of_type={fields_of_type}
+            />
+          </div>
+        );
       }
 
       switch (data.field_type) {
@@ -209,6 +273,8 @@ export default function FormReducers({ fields, styleFunc }) {
                 field_subject={data.main_subject}
                 input_type={"text"}
                 considerations={considerations}
+                check_if_dynamic={check_if_dynamic}
+                parent={data.master_subject}
               />
             </div>
           );
@@ -230,6 +296,8 @@ export default function FormReducers({ fields, styleFunc }) {
                 field_subject={data.main_subject}
                 input_type={"number"}
                 considerations={considerations}
+                check_if_dynamic={check_if_dynamic}
+                parent={data.master_subject}
               />
             </div>
           );
@@ -251,6 +319,8 @@ export default function FormReducers({ fields, styleFunc }) {
                 field_subject={data.main_subject}
                 input_type={"password"}
                 considerations={considerations}
+                check_if_dynamic={check_if_dynamic}
+                parent={data.master_subject}
               />
             </div>
           );
@@ -352,6 +422,32 @@ export default function FormReducers({ fields, styleFunc }) {
                 field_subject={data.main_subject}
                 input_type={"date_picker"}
                 considerations={considerations}
+                check_if_dynamic={check_if_dynamic}
+                parent={data.master_subject}
+              />
+            </div>
+          );
+          break;
+        case "INPUT_FIELD_SELECT":
+          console.log("select menu");
+          StructuredFields.push(
+            <div
+              key={data.field_id}
+              style={{
+                ...styleBase({
+                  data: considerations.Styling,
+                  fieldSubject: data.main_subject,
+                }),
+              }}
+            >
+              <InputFields
+                label_subject={data.main_subject}
+                field_id={data.field_id}
+                field_subject={data.main_subject}
+                input_type={"select_menu"}
+                considerations={considerations}
+                check_if_dynamic={check_if_dynamic}
+                parent={data.master_subject}
               />
             </div>
           );
@@ -360,6 +456,7 @@ export default function FormReducers({ fields, styleFunc }) {
           return null;
       }
     });
+
     if (gridAreaName.length) {
       styleFunc(
         styleNormalizer({
@@ -368,6 +465,7 @@ export default function FormReducers({ fields, styleFunc }) {
         })
       );
     }
+
     return StructuredFields;
   };
 
@@ -375,4 +473,3 @@ export default function FormReducers({ fields, styleFunc }) {
 
   return <>{fieldsProcesss}</>;
 }
-

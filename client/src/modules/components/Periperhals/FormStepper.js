@@ -9,10 +9,14 @@ import FormFields from "../Cores/FormFields";
 import {
   getReferencedFieldsOfAlbumType,
   addBatchData,
+  ConsolidateBatchDynamicData,
 } from "../../Server/FieldsQueries";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 import { useDispatch, connect } from "react-redux";
-import { ConvertToDataFields } from "../../Normalizer/ObjectNormalizer";
+import {
+  ConvertToDataFields,
+  NormalizeParentFieldValueFormat,
+} from "../../Normalizer/ObjectNormalizer";
 import { deleteAllFieldValue } from "../../Redux/Reducers/Slice/FieldsSlice";
 
 function getStepContent(step) {
@@ -39,6 +43,7 @@ export function FormStepper({
   const [skipped, setSkipped] = React.useState(new Set());
   const [steps, setSteps] = useState([]);
   const [consolidateBatchData] = useMutation(addBatchData);
+  const [addBatchDynamicData] = useMutation(ConsolidateBatchDynamicData);
   const dispatch = useDispatch();
 
   const { loading, error1, data = [] } = useQuery(
@@ -83,7 +88,9 @@ export function FormStepper({
   };
 
   const handleSubmit = async ({ album }) => {
-    if (FieldsState.input !== [] && album) {
+    let album_id = null;
+
+    if (Object.values(FieldsState.input).length > 0 && album) {
       const consolidate_result = await consolidateBatchData({
         variables: {
           data_album_type: album,
@@ -91,9 +98,31 @@ export function FormStepper({
         },
       });
 
-      handleReset();
+      album_id =
+        consolidate_result.data.consolidateBatchData.result[0].data_album_id ??
+        null;
     }
 
+    console.log(album_id);
+    if (
+      FieldsState.new_dynamic_data !== [] ||
+      FieldsState.hold_dynamic_data !== []
+    ) {
+      const consolidate_dbatch = await addBatchDynamicData({
+        variables: {
+          album_type: album,
+          album_id: album_id ?? null,
+          input: NormalizeParentFieldValueFormat([
+            ...FieldsState.new_dynamic_data,
+            ...FieldsState.hold_dynamic_data,
+          ]),
+        },
+      });
+
+      console.log({ consolidate_dbatch });
+    }
+
+    handleReset();
     handleClose();
   };
 

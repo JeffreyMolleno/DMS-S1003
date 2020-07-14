@@ -3,6 +3,7 @@ import { useDispatch, connect } from "react-redux";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 import { getReferencedFieldsOfAlbumType } from "../../Server/FieldsQueries";
 import FormFields from "../Cores/FormFields";
+import PageTable from "../Cores/PageTable/PageTable";
 
 export function TabPage({ ComponentAlbumType, PageState }) {
   // const dispatch = useDispatch();
@@ -18,15 +19,17 @@ export function TabPage({ ComponentAlbumType, PageState }) {
   // );
 
   return (
-    <div>
+    <div style={{ width: "100%", background: "#EDEDED" }}>
       {/* {data.getReferencedFieldsOfAlbumType &&
         data.getReferencedFieldsOfAlbumType.result.map((data) => {
           return <div>{data.main_subject}</div>;
         })} */}
-      <FormFields
+      {/* <FormFields
         fields_of_type={"TAB_PAGE_COMPONENTS"}
         master={PageState.Page}
-      />
+      /> */}
+
+      <PageTable />
     </div>
   );
 }
