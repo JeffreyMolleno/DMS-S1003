@@ -1,9 +1,33 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import MainTable from "./MainTable";
+import { useQuery, useMutation } from "@apollo/react-hooks";
+import { getReferencedFieldsOfAlbumType } from "../../../Server/FieldsQueries";
+import TableDataNormalizer from "../TableDataNormalizer";
 
 export default function PageTable({ Parent = "Accounts" }) {
+  const [state, setstate] = useState({ columns: [] });
+
+  const { loading, error, data } = useQuery(getReferencedFieldsOfAlbumType, {
+    variables: { type_subject: "", master: Parent, showChild: true },
+  });
+
   const classes = useStyles();
+
+  const tabledata = new TableDataNormalizer();
+
+  useEffect(() => {
+    tabledata.structureColumns({
+      datafields: !loading && data.getReferencedFieldsOfAlbumType.result,
+    });
+
+    !loading &&
+      setstate((prevState) => {
+        return { ...prevState, columns: tabledata.getColumns() };
+      });
+  }, [data]);
+
+  console.log({ data });
 
   return (
     <>
@@ -45,7 +69,7 @@ export default function PageTable({ Parent = "Accounts" }) {
       </div>
 
       <div>
-        <MainTable />
+        <MainTable Parent={Parent} Columns={state.columns} />
       </div>
     </>
   );
