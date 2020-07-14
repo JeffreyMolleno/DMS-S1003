@@ -13,7 +13,12 @@ import {
   editHoldFieldValue,
 } from "../../Redux/Reducers/Slice/FieldsSlice";
 
-export function Table({ FieldState, Parent }) {
+export function Table({
+  FieldState,
+  Parent,
+  forForms = false,
+  forTable = true,
+}) {
   const [state, setstate] = useState({ columns: [], data: [] });
 
   const dispatch = useDispatch();
@@ -48,49 +53,6 @@ export function Table({ FieldState, Parent }) {
     }
   }, [FieldState.hold_dynamic_data]);
 
-  const customStyles = {
-    rows: {
-      style: {
-        // minHeight: "72px", // override the row height
-      },
-    },
-    headCells: {
-      style: {
-        height: "0px",
-        // paddingLeft: "8px", // override the cell padding for head cells
-        // paddingRight: "8px",
-      },
-    },
-    cells: {
-      style: {
-        paddingLeft: "8px", // override the cell padding for data cells
-        paddingRight: "8px",
-      },
-    },
-  };
-
-  const data_test = [
-    {
-      // id: 1,
-      "Name %References%": "Conan the Barbarian",
-      "Contact Number": "1982",
-    },
-  ];
-
-  const columns = [
-    {
-      name: "Contact Number",
-      selector: "Contact Number",
-      sortable: true,
-    },
-    {
-      name: "Name",
-      selector: "Name %References%",
-      sortable: true,
-      // right: true,
-    },
-  ];
-
   const handleEdit = (data) => {
     dispatch(editHoldFieldValue({ parent: Parent, field_values: data }));
   };
@@ -100,43 +62,91 @@ export function Table({ FieldState, Parent }) {
   };
 
   return (
-    <div style={{ display: state.data.length > 0 ? "block" : "none" }}>
-      <DataTable
-        // title={Parent}
-        columns={[
-          ...state.columns,
-          {
-            cell: (row) => (
-              <Button raised primary onClick={() => handleEdit(row)}>
-                Edit
-              </Button>
-            ),
-            ignoreRowClick: true,
-            allowOverflow: true,
-            button: true,
-          },
-          {
-            cell: (row) => (
-              <Button raised primary onClick={() => handleDelete(row)}>
-                Delete
-              </Button>
-            ),
-            ignoreRowClick: true,
-            allowOverflow: true,
-            button: true,
-          },
-          {
-            width: "0px",
-            selector: "id",
-            hide: "lg",
-          },
-        ]}
-        data={state.data}
-        customStyles={customStyles}
-      />
-    </div>
+    <>
+      {forTable && <div></div>}
+
+      <div style={{ display: state.data.length > 0 ? "block" : "none" }}>
+        <DataTable
+          // title={Parent}
+          columns={[
+            ...state.columns,
+            {
+              cell: (row) => (
+                <Button raised primary onClick={() => handleEdit(row)}>
+                  Edit
+                </Button>
+              ),
+              ignoreRowClick: true,
+              allowOverflow: true,
+              button: true,
+            },
+            {
+              cell: (row) => (
+                <Button raised primary onClick={() => handleDelete(row)}>
+                  Delete
+                </Button>
+              ),
+              ignoreRowClick: true,
+              allowOverflow: true,
+              button: true,
+            },
+            {
+              width: "0px",
+              selector: "id",
+              hide: "lg",
+            },
+          ]}
+          data={state.data}
+          customStyles={forForms && customStyles}
+        />
+      </div>
+    </>
   );
 }
+
+const customStyles = {
+  rows: {
+    style: {
+      // minHeight: "72px", // override the row height
+    },
+  },
+  headCells: {
+    style: {
+      height: "0px",
+      color: "red",
+      // paddingLeft: "8px", // override the cell padding for head cells
+      // paddingRight: "8px",
+    },
+  },
+  cells: {
+    style: {
+      paddingLeft: "8px", // override the cell padding for data cells
+      paddingRight: "8px",
+    },
+  },
+};
+
+const data_test = [
+  {
+    // id: 1,
+    "Name %References%": "Conan the Barbarian",
+    "Contact Number": "1982",
+  },
+];
+
+const columns = [
+  {
+    name: "Contact Number",
+    selector: "Contact Number",
+    sortable: true,
+  },
+  {
+    name: "Name",
+    selector: "Name %References%",
+    sortable: true,
+    // right: true,
+  },
+];
 
 const mapStateToProps = (state) => {
   return { FieldState: state.Fields };
